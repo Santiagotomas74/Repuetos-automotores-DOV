@@ -3,27 +3,27 @@
 const models = [
   {
     name: "Golf",
-    image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a",
+    image: "",
   },
   {
     name: "Amarok",
-    image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2",
+    image: "",
   },
   {
     name: "Polo",
-    image: "https://images.unsplash.com/photo-1549921296-3a6b4f44b8a4",
+    image: "",
   },
   {
     name: "Vento",
-    image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image: "",
   },
   {
     name: "Passat",
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70",
+    image: "",
   },
   {
     name: "Tiguan",
-    image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image: "",
   },
 ];
 

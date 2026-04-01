@@ -113,7 +113,7 @@ const handleDelete = async (id: string) => {
     </button>
 
     <button
-      onClick={() => setSection("shipping")}
+      onClick={() => setSection("")}
       className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
         section === "shipping"
           ? "bg-indigo-100 text-indigo-700 font-medium"
@@ -125,7 +125,7 @@ const handleDelete = async (id: string) => {
     </button>
 
     <button
-      onClick={() => setSection("finance")}
+      onClick={() => setSection("")}
       className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
         section === "finance"
           ? "bg-indigo-100 text-indigo-700 font-medium"
