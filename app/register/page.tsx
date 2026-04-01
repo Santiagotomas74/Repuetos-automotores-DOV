@@ -118,7 +118,7 @@ export default function Register() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-black text-gray-900 mb-2 italic uppercase">Crear Cuenta</h1>
-            <p className="text-gray-400 font-medium">Únete a la experiencia Premium</p>
+            
           </div>
 
           <div className=" p-6">
