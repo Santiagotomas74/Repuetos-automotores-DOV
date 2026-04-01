@@ -82,12 +82,7 @@ export default function Login() {
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden tracking-tight">
       
       <div className="relative w-full md:w-1/2 h-[40vh] md:h-screen flex flex-col justify-center p-8 md:p-20 text-white overflow-hidden">
-       <div 
-  className="absolute inset-0 bg-cover bg-center blur-md animate-world" 
-  style={{ 
-    backgroundImage: "url('https://wallpapers.com/images/featured-full/fondods-de-iphone-x-cl6oxggnjvcvt89q.jpg')", 
-  }}
-/>
+      
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
         
         <div className="relative z-10 space-y-6">
@@ -95,19 +90,13 @@ export default function Login() {
             {/* <div className="p-3 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"> // si pinta lo usamos !!
               <Smartphone size={32} className="text-white" />
             </div> */}
-            <span className="font-black text-2xl tracking-[0.2em] uppercase">TechStore</span>
+            
           </div>
           
           <div className="space-y-2">
-            <h2 className="text-5xl md:text-7xl font-black leading-none tracking-tighter">
-              DESCUBRE <br /> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-100 to-indigo-900">
-                EL FUTURO.
-              </span>
-            </h2>
-            <p className="text-white/60 text-lg md:text-xl font-medium max-w-sm leading-relaxed">
-              Inicia sesión para acceder a nuestra selección exclusiva de tecnología Apple.
-            </p>
+            
+         
+         
           </div>
         </div>
       </div>

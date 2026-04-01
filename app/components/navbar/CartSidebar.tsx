@@ -744,8 +744,8 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
 
     <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2  ">
             <p className="text-black"><strong>CBU:</strong> 0000003100000000000000</p>
-            <p className="text-black"><strong>Alias:</strong> TECHSTORE.PAGOS</p>
-            <p className="text-black"><strong>Titular:</strong> Tech Store S.A.</p>
+            <p className="text-black"><strong>Alias:</strong> Dov.PAGOS</p>
+            <p className="text-black"><strong>Titular:</strong> Dov S.A.</p>
           </div>
     
     <p className="text-sm text-gray-900">
