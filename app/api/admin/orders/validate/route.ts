@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
     // calcular total
     const total = productsRows.reduce(
-      (sum, p) => sum + Number(p.unit_price) * Number(p.quantity),
+      (sum: number, p: { unit_price: any; quantity: any; }) => sum + Number(p.unit_price) * Number(p.quantity),
       0
     );
 
