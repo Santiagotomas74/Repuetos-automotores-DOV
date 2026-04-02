@@ -33,7 +33,10 @@ export default function EditProduct() {
     image1: "",
     image2: "",
     image3: "",
-    image4: ""
+    image4: "",
+    brand: "",
+  compatible_models: "",
+  part_type: ""
   });
 
   
@@ -73,6 +76,7 @@ export default function EditProduct() {
         const res = await fetch(`/api/products/${id}`);
         if (!res.ok) throw new Error("Producto no encontrado");
         const data = await res.json();
+        console.log("Producto cargado:", data);
         setForm({
           name: data.name || "",
             oem_number: data.oem_number || "",
@@ -85,6 +89,9 @@ export default function EditProduct() {
           image2: data.image2 || "",
           image3: data.image3 || "",
           image4: data.image4 || "",
+          brand: data.brand || "",
+          compatible_models: data.compatible_models || "",
+          part_type: data.part_type || ""
         });
         setLoading(false);
       } catch (error) {
@@ -238,7 +245,7 @@ export default function EditProduct() {
         onChange={(e) =>
           setForm({
             ...form,
-            oem_number: e.target.value.toUpperCase(), // 🔥 PRO
+            oem_number: e.target.value.toUpperCase(),
           })
         }
         className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 border outline-none"
@@ -262,9 +269,67 @@ export default function EditProduct() {
       />
     </div>
 
+    {/* 🔵 MARCA */}
+    <div className="space-y-1">
+      <label className="text-sm font-medium text-gray-700">
+        Marca
+      </label>
+      <input
+        name="brand"
+        placeholder="Ej: Volkswagen"
+        value={form.brand || ""}
+        onChange={(e) =>
+          setForm({ ...form, brand: e.target.value })
+        }
+        className="w-full border-gray-300 rounded-lg p-2.5 border outline-none"
+        required
+      />
+    </div>
+
+    {/* 🔵 MODELO */}
+    <div className="space-y-1">
+      <label className="text-sm font-medium text-gray-700">
+        Modelo compatible
+      </label>
+      <input
+        name="model"
+        placeholder="Ej: Golf"
+        value={form.compatible_models || ""}
+        onChange={(e) =>
+          setForm({ ...form, compatible_models: e.target.value })
+        }
+        className="w-full border-gray-300 rounded-lg p-2.5 border outline-none"
+        required
+      />
+    </div>
+
+    {/* 🟣 TIPO DE REPUESTO */}
+    <div className="md:col-span-2 space-y-1">
+      <label className="text-sm font-medium text-gray-700">
+        Tipo de repuesto
+      </label>
+
+      <select
+        name="part_type"
+        value={form.part_type || ""}
+        onChange={(e) =>
+          setForm({ ...form, part_type: e.target.value })
+        }
+        className="w-full border-gray-300 rounded-lg p-2.5 border outline-none focus:ring-2 focus:ring-blue-500"
+        required
+      >
+        <option value="">Seleccionar tipo</option>
+        <option value="Motor">Motor</option>
+        <option value="Frenos">Frenos</option>
+        <option value="Suspensión">Suspensión</option>
+        <option value="Electricidad">Electricidad</option>
+        <option value="Filtros">Filtros</option>
+      </select>
+    </div>
+
     {/* STOCK */}
     <div className="space-y-1">
-      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+      <label className="text-sm font-medium text-gray-700">
         Stock Disponible
       </label>
       <input
@@ -284,7 +349,7 @@ export default function EditProduct() {
 
     {/* PRECIO */}
     <div className="space-y-1">
-      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+      <label className="text-sm font-medium text-gray-700">
         Precio
       </label>
       <input

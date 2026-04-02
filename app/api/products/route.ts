@@ -11,14 +11,69 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { oem_number, oem_equivalents, name, stock, description, price, image1, image2, image3, image4 } = await req.json();
+  const {
+    oem_number,
+    oem_equivalents,
+    name,
+    stock,
+    description,
+    price,
+    image1,
+    image2,
+    image3,
+    image4,
+    part_type,        // 🔹 tipo de repuesto
+    compatible_models,       // 🔹 modelo compatible
+    brand        // 🔹 marca
+  } = await req.json();
 
-  const { rows } = await query(
-    `INSERT INTO products (oem_number, oem_equivalents, name, stock, description, price, image1, image2, image3, image4)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-     RETURNING *`,
-    [oem_number, oem_equivalents, name, stock, description, price, image1, image2, image3, image4]
-  );
+  try {
+    const { rows } = await query(
+      `INSERT INTO products (
+        oem_number,
+        oem_equivalents,
+        name,
+        stock,
+        description,
+        price,
+        image1,
+        image2,
+        image3,
+        image4,
+        part_type,
+        compatible_models,
+        brand
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+        $11, $12, $13
+      )
+      RETURNING *`,
+      [
+        oem_number,
+        oem_equivalents,
+        name,
+        stock,
+        description,
+        price,
+        image1,
+        image2,
+        image3,
+        image4,
+        part_type,
+        compatible_models,
+        brand
+      ]
+    );
 
-  return NextResponse.json(rows[0]);
+    return NextResponse.json(rows[0]);
+
+  } catch (error) {
+    console.error("Error creando producto:", error);
+
+    return NextResponse.json(
+      { error: "Error al crear producto" },
+      { status: 500 }
+    );
+  }
 }

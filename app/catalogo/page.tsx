@@ -1,86 +1,69 @@
 "use client";
 
-import { useState } from "react";
-
-const MOCK_PRODUCTS = [
-  {
-    id: 1,
-    name: "Pastillas de Freno Delanteras",
-    oem_number: "23456",
-    compatible: "Golf",
-    price: 45000,
-    image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=500&auto=format&fit=crop",
-    oem_equivalents: "23452352435, 2352345",
-  },
-  {
-    id: 2,
-    name: "Filtro de Aceite Premium",
-    oem_number: "2345434346",
-    compatible: "Polo",
-    price: 12000,
-    image: "https://images.unsplash.com/photo-1625047509168-a7026f36de04?q=80&w=500&auto=format&fit=crop",
-    oem_equivalents: "52435, 52345",
-  },
-  {
-    id: 3,
-    name: "Bujías de Ignición x4",
-    oem_number: "233543456",
-    compatible: "Vento",
-    price: 28000,
-    image: "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?q=80&w=500&auto=format&fit=crop",
-    oem_equivalents: "2342435, 2355",
-  },
-  {
-    id: 4,
-    name: "Amortiguadores Traseros",
-    oem_number: "23453453456",
-    compatible: "Amarok",
-    price: 85000,
-    image: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=500&auto=format&fit=crop",
-    oem_equivalents: "86786, 567345",
-  },
-];
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
+  const router = useRouter();
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [selectedModel, setSelectedModel] = useState("Todos");
   const [selectedType, setSelectedType] = useState("Todas");
   const [selectedPrice, setSelectedPrice] = useState("Todos");
 
-  // 🔥 KEYWORDS PARA TIPO
-  const typeKeywords: Record<string, string[]> = {
-    Motor: ["motor", "aceite", "distribucion"],
-    Frenos: ["freno", "pastilla", "disco"],
-    Suspensión: ["amortiguador", "suspension"],
-    Electricidad: ["bateria", "bujia", "sensor"],
-    Filtros: ["filtro"],
-  };
+  // 🔥 FETCH REAL
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
 
-  // 🔎 FILTRO COMPLETO
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
-    const name = p.name.toLowerCase();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProducts();
+  }, []);
+
+  // 🔎 FILTRO REAL
+  const filteredProducts = products.filter((p) => {
+    // 🔵 MODELO (array en DB)
     const matchModel =
-      selectedModel === "Todos" || p.compatible === selectedModel;
+      selectedModel === "Todos" ||
+      (Array.isArray(p.compatible_models) &&
+        p.compatible_models.includes(selectedModel));
 
+    // 🟣 TIPO (directo desde DB)
     const matchType =
       selectedType === "Todas" ||
-      typeKeywords[selectedType]?.some((keyword) =>
-        name.includes(keyword)
-      );
+      p.part_type?.toLowerCase() === selectedType.toLowerCase();
+
+    // 🟢 PRECIO
+    const price = Number(p.price);
 
     const matchPrice =
       selectedPrice === "Todos" ||
-      (selectedPrice === "Hasta 30000" && p.price <= 30000) ||
-      (selectedPrice === "30000-60000" &&
-        p.price > 30000 &&
-        p.price <= 60000) ||
-      (selectedPrice === "60000-100000" &&
-        p.price > 60000 &&
-        p.price <= 100000) ||
-      (selectedPrice === "100000+" && p.price > 100000);
+      (selectedPrice === "Hasta 30000" && price <= 30000) ||
+      (selectedPrice === "30000-60000" && price > 30000 && price <= 60000) ||
+      (selectedPrice === "60000-100000" && price > 60000 && price <= 100000) ||
+      (selectedPrice === "100000+" && price > 100000);
 
     return matchModel && matchType && matchPrice;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Cargando productos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 pb-16 pt-[40px]">
@@ -168,11 +151,12 @@ export default function ProductsPage() {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col"
+                onClick={() => router.push(`/product/${product.id}`)} // 🔥 REDIRECCIÓN
+                className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col cursor-pointer"
               >
                 <div className="relative h-48 bg-gray-200">
                   <img
-                    src={product.image}
+                    src={product.image1 || product.image}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
@@ -187,15 +171,26 @@ export default function ProductsPage() {
                     OEM: {product.oem_number}
                   </p>
 
-                  <p className="text-xs text-gray-500 mt-1">
-                  OEM Equivalentes: {product.oem_equivalents}
-                  </p>
+                  {product.oem_equivalents && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      OEM Equivalentes:{" "}
+                      {Array.isArray(product.oem_equivalents)
+                        ? product.oem_equivalents.join(", ")
+                        : product.oem_equivalents}
+                    </p>
+                  )}
 
                   <p className="text-xl font-bold mt-auto mb-4 text-blue-900">
-                    ${product.price.toLocaleString("es-AR")}
+                    ${Number(product.price).toLocaleString("es-AR")}
                   </p>
 
-                  <button className="w-full bg-[#00173D] text-white py-2 rounded-lg">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // 🔥 evita que navegue al hacer click
+                      console.log("Agregar al carrito");
+                    }}
+                    className="w-full bg-[#00173D] text-white py-2 rounded-lg"
+                  >
                     Añadir al carrito
                   </button>
                 </div>

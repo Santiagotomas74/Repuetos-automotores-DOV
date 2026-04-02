@@ -5,9 +5,6 @@ import { useState } from "react";
 import { UploadCloud, Image as ImageIcon, Save, ArrowLeft } from "lucide-react";
 import Swal from "sweetalert2";
 
- 
-
-
 type ImageField = "image1" | "image2" | "image3" | "image4";
 
 export default function NewProduct() {
@@ -20,6 +17,9 @@ export default function NewProduct() {
     stock: "",
     description: "",
     price: "",
+    part_type: "",
+    brand: "",
+    compatible_models: "",
     image1: "",
     image2: "",
     image3: "",
@@ -29,7 +29,7 @@ export default function NewProduct() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setForm({
       ...form,
@@ -67,11 +67,7 @@ export default function NewProduct() {
           <UploadCloud className="w-8 h-8 mb-2 text-gray-400" />
           <span className="text-sm text-gray-500">Click para subir</span>
 
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-          />
+          <input type="file" accept="image/*" className="hidden" />
         </label>
       )}
 
@@ -88,39 +84,48 @@ export default function NewProduct() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       const formattedData = {
         ...form,
         oem_number: form.oem_number.toUpperCase(),
-        oem_equivalents: form.oem_equivalents.toUpperCase()
-          ? form.oem_equivalents.toUpperCase()
+
+        oem_equivalents: form.oem_equivalents
+          ? form.oem_equivalents
+              .toUpperCase()
               .split(",")
-              .map((e) => e.trim().toUpperCase())
-              .filter((e) => e.length > 0) // elimina vacíos
-          : null,
+              .map((e) => e.trim())
+              .filter((e) => e.length > 0)
+          : [],
+
+        compatible_models: form.compatible_models
+          ? form.compatible_models
+              .split(",")
+              .map((m) => m.trim())
+              .filter((m) => m.length > 0)
+          : [],
+
         price: Number(form.price),
         stock: Number(form.stock),
       };
-  
+
       const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),
       });
-  
+
       if (!res.ok) throw new Error("Error creando producto");
-  
+
       await Swal.fire({
         icon: "success",
         title: "Producto creado",
         text: "El producto se creó correctamente",
         confirmButtonColor: "#2563eb",
       });
-  
+
       router.push("/admin");
       router.refresh();
-  
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -138,128 +143,128 @@ export default function NewProduct() {
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* HEADER */}
-          {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <button 
-              onClick={() => router.push("/admin")}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-2"
-            >
-              <ArrowLeft size={20} className="mr-1" /> Volver al panel
-            </button>
-
-          </div>
-        </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Crear Producto
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Agrega un nuevo producto al catálogo
-          </p>
+          <button
+            onClick={() => router.push("/admin")}
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
+          >
+            <ArrowLeft size={20} className="mr-1" /> Volver
+          </button>
+
+          <h1 className="text-3xl font-bold">Crear Producto</h1>
+          <p className="text-gray-500">Agrega un nuevo producto</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-         {/* CARD INFO */}
-<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
+          {/* INFO */}
+          <div className="bg-white rounded-2xl border p-6 space-y-4">
 
-<h2 className="text-lg font-semibold text-gray-800">
-  Información Principal
-</h2>
+            <input
+              name="oem_number"
+              placeholder="Número OEM"
+              value={form.oem_number}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
 
-{/* OEM NUMBER */}
-<input
-  name="oem_number"
-  placeholder="Número OEM (código único)"
-  value={form.oem_number}
-  onChange={handleChange}
-  className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 border outline-none"
-  required
-/>
+            <input
+              name="oem_equivalents"
+              placeholder="Equivalencias OEM (coma)"
+              value={form.oem_equivalents}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
 
-{/* OEM EQUIVALENTS */}
-<input
-  name="oem_equivalents"
-  placeholder="Equivalencias OEM (separadas por coma)"
-  value={form.oem_equivalents}
-  onChange={handleChange}
-  className="w-full border-gray-300 rounded-lg p-2.5 border outline-none"
-/>
+            <input
+              name="name"
+              placeholder="Nombre del producto"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
 
-{/* NAME */}
-<input
-  name="name"
-  placeholder="Nombre del producto"
-  value={form.name}
-  onChange={handleChange}
-  className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 border outline-none"
-  required
-/>
+            {/* 🔥 NUEVO */}
+            <select
+              name="part_type"
+              value={form.part_type}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            >
+              <option value="">Tipo de repuesto</option>
+              <option value="Motor">Motor</option>
+              <option value="Frenos">Frenos</option>
+              <option value="Suspensión">Suspensión</option>
+              <option value="Electricidad">Electricidad</option>
+              <option value="Filtros">Filtros</option>
+            </select>
 
-{/* STOCK + PRICE */}
-<div className="grid grid-cols-2 gap-4">
-  <input
-    name="stock"
-    type="number"
-    placeholder="Stock disponible"
-    value={form.stock}
-    onChange={handleChange}
-    className="border p-2.5 rounded-lg"
-    required
-  />
+            <input
+              name="brand"
+              placeholder="Marca (Ej: Volkswagen)"
+              value={form.brand}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
 
-  <input
-    name="price"
-    type="number"
-    step="1"
-    placeholder="Precio"
-    value={form.price}
-    onChange={handleChange}
-    className="border p-2.5 rounded-lg font-semibold text-blue-600"
-    required
-  />
-</div>
+            <input
+              name="compatible_models"
+              placeholder="Modelos compatibles (Ej: Golf, Polo, Vento)"
+              value={form.compatible_models}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
 
-{/* DESCRIPTION */}
-<textarea
-  name="description"
-  placeholder="Descripción del producto"
-  value={form.description}
-  onChange={handleChange}
-  className="w-full border p-2.5 rounded-lg min-h-[120px]"
-/>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                name="stock"
+                type="number"
+                placeholder="Stock"
+                value={form.stock}
+                onChange={handleChange}
+                className="border p-2 rounded-lg"
+                required
+              />
 
-</div>
-
-          {/* CARD IMAGES */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
-
-            <h2 className="text-lg font-semibold text-gray-800">
-              Imágenes
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {renderImageInput("image1", "Imagen Principal")}
-              {renderImageInput("image2", "Detalles")}
-              {renderImageInput("image3", "Detalle")}
-              {renderImageInput("image4", "Detalle")}
+              <input
+                name="price"
+                type="number"
+                placeholder="Precio"
+                value={form.price}
+                onChange={handleChange}
+                className="border p-2 rounded-lg"
+                required
+              />
             </div>
 
+            <textarea
+              name="description"
+              placeholder="Descripción"
+              value={form.description}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+            />
           </div>
 
-          {/* BOTÓN */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-sm"
-            >
-              <Save size={18} />
-              {loading ? "Creando..." : "Crear Producto"}
-            </button>
+          {/* IMAGES */}
+          <div className="bg-white rounded-2xl border p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {renderImageInput("image1", "Principal")}
+            {renderImageInput("image2", "Detalle")}
+            {renderImageInput("image3", "Detalle")}
+            {renderImageInput("image4", "Detalle")}
           </div>
 
+          {/* BUTTON */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl"
+          >
+            {loading ? "Creando..." : "Crear Producto"}
+          </button>
         </form>
       </div>
     </div>

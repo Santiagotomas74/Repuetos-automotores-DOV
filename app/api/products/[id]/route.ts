@@ -83,7 +83,32 @@ export async function PUT(
     image2,
     image3,
     image4,
+    brand,
+    compatible_models,
+    part_type
   } = await req.json();
+console.log(price);
+  // 🔧 FORMAT MODELS
+  const formattedModel =
+    compatible_models && compatible_models.length > 0
+      ? Array.isArray(compatible_models)
+        ? compatible_models
+        : compatible_models
+            .split(",")
+            .map((m: string) => m.trim())
+            .filter((m: string) => m.length > 0)
+      : null;
+
+  // 🔧 FORMAT OEM
+  const formattedOEM =
+    oem_equivalents && oem_equivalents.length > 0
+      ? Array.isArray(oem_equivalents)
+        ? oem_equivalents
+        : oem_equivalents
+            .split(",")
+            .map((e: string) => e.trim().toUpperCase())
+            .filter((e: string) => e.length > 0)
+      : null;
 
   try {
     const { rows } = await query(
@@ -98,12 +123,15 @@ export async function PUT(
          image1 = $7,
          image2 = $8,
          image3 = $9,
-         image4 = $10
-       WHERE id = $11
+         image4 = $10,
+         brand = $11,
+         compatible_models = $12,
+         part_type = $13
+       WHERE id = $14
        RETURNING *`,
       [
         oem_number,
-        oem_equivalents,
+        formattedOEM,       // 🔥 FIX
         name,
         stock,
         description,
@@ -112,6 +140,9 @@ export async function PUT(
         image2,
         image3,
         image4,
+        brand,
+        formattedModel,     // 🔥 FIX
+        part_type,
         id,
       ]
     );
@@ -120,6 +151,7 @@ export async function PUT(
 
   } catch (error) {
     console.error("Error en PUT product:", error);
+
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
