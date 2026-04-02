@@ -2,16 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+
+
 
 export default function ProductsPage() {
   const router = useRouter();
-
+const searchParams = useSearchParams();
+const searchQuery = searchParams.get("search")?.toLowerCase() || "";
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedModel, setSelectedModel] = useState("Todos");
   const [selectedType, setSelectedType] = useState("Todas");
   const [selectedPrice, setSelectedPrice] = useState("Todos");
+  const [selectedBrand, setSelectedBrand] = useState("Todos");
 
   // 🔥 FETCH REAL
   useEffect(() => {
@@ -33,7 +38,25 @@ export default function ProductsPage() {
 
   // 🔎 FILTRO REAL
   const filteredProducts = products.filter((p) => {
+      const name = p.name.toLowerCase();
+  const oem = p.oem_number?.toLowerCase();
+  const models = p.compatible_models?.join(" ").toLowerCase() || "";
+  const oemEquivalents = Array.isArray(p.oem_equivalents)
+    ? p.oem_equivalents.join(" ").toLowerCase()
+    : p.oem_equivalents?.toLowerCase() || "";
+
+  const matchSearch =
+    !searchQuery ||
+    name.includes(searchQuery) ||
+    oemEquivalents.includes(searchQuery) ||
+    oem.includes(searchQuery) ||
+    models.includes(searchQuery);
     // 🔵 MODELO (array en DB)
+
+const matchBrand =
+  selectedBrand === "Todos" ||
+  p.brand?.toLowerCase() === selectedBrand.toLowerCase();
+
     const matchModel =
       selectedModel === "Todos" ||
       (Array.isArray(p.compatible_models) &&
@@ -54,7 +77,7 @@ export default function ProductsPage() {
       (selectedPrice === "60000-100000" && price > 60000 && price <= 100000) ||
       (selectedPrice === "100000+" && price > 100000);
 
-    return matchModel && matchType && matchPrice;
+    return matchSearch && matchModel && matchType && matchPrice && matchBrand;
   });
 
   if (loading) {
@@ -89,7 +112,20 @@ export default function ProductsPage() {
             <h2 className="text-lg font-bold text-[#00173D]">
               Filtros
             </h2>
-
+ {/* MODELO */}
+            <div>
+              <h3 className="font-semibold mb-3 text-black">Nuestras Marcas</h3>
+              {["Todos", "Volkswagen", "Chevrolet", "Renault"].map((p) => (
+                <label key={p} className="flex gap-2 text-sm text-black">
+                  <input
+                    type="radio"
+                    checked={selectedBrand === p}
+                    onChange={() => setSelectedBrand(p)}
+                  />
+                  {p}
+                </label>
+              ))}
+            </div>
             {/* MODELO */}
             <div>
               <h3 className="font-semibold mb-3 text-black">Modelo Volkswagen</h3>

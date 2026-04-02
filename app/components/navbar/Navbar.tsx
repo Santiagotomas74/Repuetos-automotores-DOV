@@ -23,7 +23,13 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
+const handleSearch = () => {
+  if (!search.trim()) return;
+
+  router.push(`/catalogo?search=${encodeURIComponent(search)}`);
+};
   const cartItemsCount = cartCount;
 
   // 🔐 sesión
@@ -183,11 +189,16 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
           type="text"
           placeholder="Buscar por nombre, modelo o número OEM"
           className="w-full py-2 outline-none text-sm sm:text-base text-gray-800"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
       {/* BUTTON */}
-      <button className="bg-[#0b2a5b] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#09214a] transition w-full sm:w-auto md:h-10">
+      <button
+        className="bg-[#0b2a5b] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#09214a] transition w-full sm:w-auto md:h-10"
+        onClick={handleSearch}
+      >
         Buscar
       </button>
 
