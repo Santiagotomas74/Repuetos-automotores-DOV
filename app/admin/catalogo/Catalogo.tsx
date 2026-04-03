@@ -25,7 +25,7 @@ export default function Products() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch("/api/catalogo");
       const data = await res.json();
       setProducts(data);
 
@@ -60,7 +60,7 @@ export default function Products() {
 
   const handleUpdatePrice = async (id: string) => {
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/catalogo/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ price: Number(newPrice) }),
@@ -98,7 +98,7 @@ export default function Products() {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`/api/products/${id}`, { method: "DELETE" });
+      await fetch(`/api/catalogo/${id}`, { method: "DELETE" });
       await Swal.fire({
         title: "Producto eliminado",
         icon: "success",
@@ -122,8 +122,8 @@ return (
 {/* Header */}
 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
   <div>
-    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-      Productos
+    <h1 className="text-2xl md:text-3xl font-bold text-green-300">
+      Productos de catalogo
     </h1>
     <p className="text-sm text-gray-500">
       Gestiona tu catálogo
@@ -202,7 +202,7 @@ Cargando catálogo...
 
             <div className="flex gap-2 pt-1">
               <Link
-                href={`/admin/products/${p.id}`}
+                href={`/admin/catalogo/${p.id}`}
                 className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-700 py-2 rounded-lg text-sm font-medium border border-gray-200"
               >
                 <Pencil size={16} />
@@ -243,13 +243,9 @@ Cargando catálogo...
                 Producto
               </th>
 
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Precio
-              </th>
+             
 
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Stock
-              </th>
+            
 
               <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
                 Acciones
@@ -274,50 +270,14 @@ Cargando catálogo...
                   </div>
                 </td>
 
-                <td className="px-6 py-4">
-  {editingId === p.id ? (
-    <input
-      type="number"
-      value={newPrice}
-      autoFocus
-      onChange={(e) => setNewPrice(e.target.value)}
-      onBlur={() => handleUpdatePrice(p.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") handleUpdatePrice(p.id);
-      }}
-      className="w-24 border rounded px-2 py-1"
-    />
-  ) : (
-    <span
-      onClick={() => {
-        setEditingId(p.id);
-        setNewPrice(p.price);
-      }}
-      className="cursor-pointer hover:text-indigo-600 font-semibold"
-    >
-      ${p.price}
-    </span>
-  )}
-</td>
+          
 
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-semibold ${
-                      p.stock > 5
-                        ? "bg-green-100 text-green-700"
-                        : p.stock > 0
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {p.stock}
-                  </span>
-                </td>
+             
 
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <Link
-                      href={`/admin/products/${p.id}`}
+                      href={`/admin/catalogo/${p.id}`}
                       className="p-2 text-gray-400 hover:text-indigo-600"
                     >
                       <Pencil size={18} />

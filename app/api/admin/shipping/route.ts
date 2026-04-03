@@ -31,9 +31,10 @@ export async function GET() {
           json_agg(
             json_build_object(
               'product_id', p.id,
+              'product_oem_number', p.oem_number,
               'product_name', p.name,
-              'product_memory', p.memory,
-              'product_color', p.color,
+              'product_description', p.description,
+              'product_image1', p.image1,
               'quantity', oi.quantity,
               'unit_price', oi.unit_price
             )

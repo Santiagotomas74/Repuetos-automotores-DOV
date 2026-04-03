@@ -21,12 +21,13 @@ export async function POST(req: Request) {
       `
       SELECT 
         products.id AS product_id,
+         products.oem_number,
+          products.oem_equivalents,
         products.name,
-        products.memory,
-        products.color,
+        products.description,
+        products.stock,
         products.price,
-        products.name,
-        products.image_1,
+        products.image1,
         cart_items.quantity
       FROM users
       INNER JOIN cart 

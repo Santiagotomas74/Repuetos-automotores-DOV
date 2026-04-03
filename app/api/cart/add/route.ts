@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // 1️⃣ Verificar producto y stock
     const productRes = await client.query(
-      `SELECT quantity FROM products WHERE id = $1 FOR UPDATE`,
+      `SELECT stock FROM products WHERE id = $1 FOR UPDATE`,
       [productId]
     );
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const stock = productRes.rows[0].quantity;
+    const stock = productRes.rows[0].stock;
 
     // 2️⃣ Buscar o crear carrito
     let cartRes = await client.query(

@@ -38,7 +38,7 @@ export async function PUT(req: Request) {
 
     // 1️⃣ Verificar que el producto existe y obtener stock
     const productResult = await client.query(
-      `SELECT quantity FROM products WHERE id = $1`,
+      `SELECT stock FROM products WHERE id = $1`,
       [product_id]
     );
 
@@ -50,7 +50,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    const stock = productResult.rows[0].quantity;
+    const stock = productResult.rows[0].stock;
 
     if (quantity > stock) {
       await client.query("ROLLBACK");

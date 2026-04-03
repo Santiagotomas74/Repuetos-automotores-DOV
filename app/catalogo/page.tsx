@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 
 
@@ -21,22 +22,42 @@ const modelFromURL = searchParams.get("model");
   const [selectedBrand, setSelectedBrand] = useState("Todos");
 
   // 🔥 FETCH REAL
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("/api/products");
-        const data = await res.json();
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const [resProducts, resCatalogo] = await Promise.all([
+        fetch("/api/products"),
+        fetch("/api/catalogo"),
+      ]);
 
-        setProducts(data);
-      } catch (error) {
-        console.error("Error cargando productos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const dataProducts = await resProducts.json();
+      const dataCatalogo = await resCatalogo.json();
 
-    fetchProducts();
-  }, []);
+      // 🔥 Marcamos los de catálogo
+      const catalogoFormatted = dataCatalogo.map((p: any) => ({
+        ...p,
+        isCatalog: true, // 👈 clave
+        source: "catalogo",
+      }));
+
+      const productsFormatted = dataProducts.map((p: any) => ({
+        ...p,
+        isCatalog: false,
+        source: "product",
+      }));
+
+      // 🔥 UNIFICAMOS
+      setProducts([...productsFormatted, ...catalogoFormatted]);
+
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, []);
 
   // 🔎 FILTRO REAL
   const filteredProducts = products.filter((p) => {
@@ -89,18 +110,15 @@ const modelFromURL = searchParams.get("model");
     brandArray.includes(selectedBrand.toLowerCase());
 
   // 🟢 PRECIO
-  const price = Number(p.price);
+ const price = p.price ? Number(p.price) : null;
 
-  const matchPrice =
-    selectedPrice === "Todos" ||
-    (selectedPrice === "Hasta 30000" && price <= 30000) ||
-    (selectedPrice === "30000-60000" &&
-      price > 30000 &&
-      price <= 60000) ||
-    (selectedPrice === "60000-100000" &&
-      price > 60000 &&
-      price <= 100000) ||
-    (selectedPrice === "100000+" && price > 100000);
+const matchPrice =
+  p.isCatalog || // 🔥 SI ES CATÁLOGO, NO FILTRAR POR PRECIO
+  selectedPrice === "Todos" ||
+  (selectedPrice === "Hasta 30000" && price !== null && price <= 30000) ||
+  (selectedPrice === "30000-60000" && price !== null && price > 30000 && price <= 60000) ||
+  (selectedPrice === "60000-100000" && price !== null && price > 60000 && price <= 100000) ||
+  (selectedPrice === "100000+" && price !== null && price > 100000);
 
   return (
     matchSearch &&
@@ -111,13 +129,28 @@ const modelFromURL = searchParams.get("model");
   );
 });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Cargando productos...</p>
+
+if (loading) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+
+      {/* LOGO */}
+      <img
+        src="/DOVV.png"
+        alt="Logo"
+        className="w-28 h-auto object-contain animate-pulse"
+      />
+
+      {/* SPINNER */}
+      <div className="flex flex-col items-center gap-2 text-gray-600">
+        <Loader2 className="w-8 h-8 animate-spin text-[#00173D]" />
+        <p className="text-sm font-medium">Cargando productos...</p>
       </div>
-    );
-  }
+
+    </div>
+  );
+}
+  
    const clearFilters = () => {
   setSelectedModel("Todos");
   setSelectedType("Todas");
@@ -231,8 +264,14 @@ const modelFromURL = searchParams.get("model");
 
             {filteredProducts.map((product) => (
               <div
-                key={product.id}
-                onClick={() => router.push(`/product/${product.id}`)} // 🔥 REDIRECCIÓN
+                key={`${product.source}-${product.id}`}
+                onClick={() =>
+  router.push(
+    product.isCatalog
+      ? `/catalogo/${product.id}`
+      : `/product/${product.id}`
+  )
+}
                 className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col cursor-pointer"
               >
                 <div className="relative h-48 bg-gray-200">
@@ -261,19 +300,49 @@ const modelFromURL = searchParams.get("model");
                     </p>
                   )}
 
-                  <p className="text-xl font-bold mt-auto mb-4 text-blue-900">
-                    ${Number(product.price).toLocaleString("es-AR")}
-                  </p>
+                  {product.isCatalog ? (
+  <>
+    <p className="text-lg font-semibold mt-auto mb-4 text-green-700">
+      Consultar precio
+    </p>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // 🔥 evita que navegue al hacer click
-                      console.log("Agregar al carrito");
-                    }}
-                    className="w-full bg-[#00173D] text-white py-2 rounded-lg"
-                  >
-                    Añadir al carrito
-                  </button>
+       <button
+  onClick={() => {
+    const phone = "5491123456789"; // 🔥 tu número (sin +, con 54 y 9)
+    
+    const message = `Hola! Estoy interesado en el producto:
+    
+🧩 ${product.name}
+🔧 OEM: ${product.oem_number}
+
+¿Podrían darme más información?`;
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, "_blank");
+  }}
+  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
+>
+  Consultar por WhatsApp
+</button>
+  </>
+) : (
+  <>
+    <p className="text-xl font-bold mt-auto mb-4 text-blue-900">
+      ${Number(product.price).toLocaleString("es-AR")}
+    </p>
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        console.log("Agregar al carrito");
+      }}
+      className="w-full bg-[#00173D] text-white py-2 rounded-lg"
+    >
+      Añadir al carrito
+    </button>
+  </>
+)}
                 </div>
               </div>
             ))}

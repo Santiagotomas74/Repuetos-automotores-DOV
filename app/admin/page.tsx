@@ -15,16 +15,28 @@ import {
   BarChart3,
   Loader2,
 } from "lucide-react";
+ import { FaWhatsapp } from "react-icons/fa"; 
+
 
 import Ordenes from "./orders/Orders";
+import Catalogo from "./catalogo/Catalogo";
 import Shipping from "./shipping/Shipping";
 import AdminFinance from "./finance/Finance";
 import Products from "./products/products";
+import { useSearchParams } from "next/navigation";
+
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState("products");
+const [section, setSection] = useState("products");
 
+const searchParams = useSearchParams();
+const sectionFromURL = searchParams.get("section");
+useEffect(() => {
+  if (sectionFromURL) {
+    setSection(sectionFromURL);
+  }
+}, [sectionFromURL]);
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -100,6 +112,18 @@ const handleDelete = async (id: string) => {
       Productos
     </button>
 
+     <button
+      onClick={() => setSection("catalogo")}
+      className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
+        section === "catalogo"
+          ? "bg-indigo-100 text-indigo-700 font-medium"
+          : "text-gray-600 hover:bg-gray-100"
+      }`}
+    >
+      <FaWhatsapp size={18} />
+      Catalogo
+    </button>
+
     <button
       onClick={() => setSection("orders")}
       className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
@@ -113,7 +137,7 @@ const handleDelete = async (id: string) => {
     </button>
 
     <button
-      onClick={() => setSection("")}
+      onClick={() => setSection("shipping")}
       className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
         section === "shipping"
           ? "bg-indigo-100 text-indigo-700 font-medium"
@@ -125,7 +149,7 @@ const handleDelete = async (id: string) => {
     </button>
 
     <button
-      onClick={() => setSection("")}
+      onClick={() => setSection("finance")}
       className={`flex items-center gap-3 px-4 py-2 rounded-lg ${
         section === "finance"
           ? "bg-indigo-100 text-indigo-700 font-medium"
@@ -197,13 +221,12 @@ const handleDelete = async (id: string) => {
 </div>
       {/* CONTENIDO */}
       <main className="flex-1 p-4 md:p-8 md:pt-8">
-
         {/* PRODUCTOS */}
         {section === "products" && (
           <Products  />
         )}
-
         {/* OTRAS SECCIONES */}
+        {section === "catalogo" && <Catalogo />}
         {section === "orders" && <Ordenes />}
         {section === "shipping" && <Shipping />}
         {section === "finance" && <AdminFinance />}
