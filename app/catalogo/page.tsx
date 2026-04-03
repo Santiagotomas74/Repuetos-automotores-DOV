@@ -10,6 +10,8 @@ export default function ProductsPage() {
   const router = useRouter();
 const searchParams = useSearchParams();
 const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+const typeQuery = searchParams.get("type");
+const modelFromURL = searchParams.get("model");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,47 +40,76 @@ const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
   // 🔎 FILTRO REAL
   const filteredProducts = products.filter((p) => {
-      const name = p.name.toLowerCase();
-  const oem = p.oem_number?.toLowerCase();
-  const models = p.compatible_models?.join(" ").toLowerCase() || "";
+  const name = String(p.name || "").toLowerCase();
+  const oem = String(p.oem_number || "").toLowerCase();
+
+  const modelsArray = Array.isArray(p.compatible_models)
+    ? p.compatible_models
+    : [];
+
+  const models = modelsArray.join(" ").toLowerCase();
+
   const oemEquivalents = Array.isArray(p.oem_equivalents)
     ? p.oem_equivalents.join(" ").toLowerCase()
-    : p.oem_equivalents?.toLowerCase() || "";
+    : String(p.oem_equivalents || "").toLowerCase();
 
+  const brandArray = Array.isArray(p.brand)
+    ? p.brand.map((b: string) => b.toLowerCase())
+    : [String(p.brand || "").toLowerCase()];
+
+  const brand = brandArray.join(" ");
+
+  const type = String(p.part_type || "").toLowerCase();
+
+  // 🔍 SEARCH
   const matchSearch =
     !searchQuery ||
     name.includes(searchQuery) ||
-    oemEquivalents.includes(searchQuery) ||
     oem.includes(searchQuery) ||
-    models.includes(searchQuery);
-    // 🔵 MODELO (array en DB)
+    oemEquivalents.includes(searchQuery) ||
+    models.includes(searchQuery) ||
+    brand.includes(searchQuery) ||
+    type.includes(searchQuery);
 
-const matchBrand =
-  selectedBrand === "Todos" ||
-  p.brand?.toLowerCase() === selectedBrand.toLowerCase();
+  // 🔵 MODELO
+  const matchModel =
+    (selectedModel === "Todos" || modelsArray.includes(selectedModel)) &&
+    (!modelFromURL || modelsArray.includes(modelFromURL));
 
-    const matchModel =
-      selectedModel === "Todos" ||
-      (Array.isArray(p.compatible_models) &&
-        p.compatible_models.includes(selectedModel));
+  // 🟣 TIPO
+  const matchType =
+    (selectedType === "Todas" ||
+      type === selectedType.toLowerCase()) &&
+    (!typeQuery ||
+      type === typeQuery.toLowerCase());
 
-    // 🟣 TIPO (directo desde DB)
-    const matchType =
-      selectedType === "Todas" ||
-      p.part_type?.toLowerCase() === selectedType.toLowerCase();
+  // 🟡 MARCA
+  const matchBrand =
+    selectedBrand === "Todos" ||
+    brandArray.includes(selectedBrand.toLowerCase());
 
-    // 🟢 PRECIO
-    const price = Number(p.price);
+  // 🟢 PRECIO
+  const price = Number(p.price);
 
-    const matchPrice =
-      selectedPrice === "Todos" ||
-      (selectedPrice === "Hasta 30000" && price <= 30000) ||
-      (selectedPrice === "30000-60000" && price > 30000 && price <= 60000) ||
-      (selectedPrice === "60000-100000" && price > 60000 && price <= 100000) ||
-      (selectedPrice === "100000+" && price > 100000);
+  const matchPrice =
+    selectedPrice === "Todos" ||
+    (selectedPrice === "Hasta 30000" && price <= 30000) ||
+    (selectedPrice === "30000-60000" &&
+      price > 30000 &&
+      price <= 60000) ||
+    (selectedPrice === "60000-100000" &&
+      price > 60000 &&
+      price <= 100000) ||
+    (selectedPrice === "100000+" && price > 100000);
 
-    return matchSearch && matchModel && matchType && matchPrice && matchBrand;
-  });
+  return (
+    matchSearch &&
+    matchModel &&
+    matchType &&
+    matchPrice &&
+    matchBrand
+  );
+});
 
   if (loading) {
     return (
@@ -87,6 +118,14 @@ const matchBrand =
       </div>
     );
   }
+   const clearFilters = () => {
+  setSelectedModel("Todos");
+  setSelectedType("Todas");
+  setSelectedPrice("Todos");
+  setSelectedBrand("Todos");
+
+  router.push("/catalogo"); // limpia query params
+};
 
   return (
     <div className="min-h-screen bg-slate-50 pb-16 pt-[40px]">
@@ -113,6 +152,12 @@ const matchBrand =
               Filtros
             </h2>
  {/* MODELO */}
+ <button
+  onClick={clearFilters}
+  className="w-full bg-blue-800 text-white-800 py-2 rounded-lg font-medium hover:bg-blue-300 transition"
+>
+  Limpiar filtros
+</button>
             <div>
               <h3 className="font-semibold mb-3 text-black">Nuestras Marcas</h3>
               {["Todos", "Volkswagen", "Chevrolet", "Renault"].map((p) => (
