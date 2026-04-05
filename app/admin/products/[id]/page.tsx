@@ -27,9 +27,9 @@ export default function EditProduct() {
     name: "",
     oem_number: "",
     oem_equivalents: "",
-    stock: "",
+    stock: 0,
     description: "",
-    price: "",
+    price: 0,
     image1: "",
     image2: "",
     image3: "",
@@ -340,7 +340,7 @@ export default function EditProduct() {
         onChange={(e) =>
           setForm({
             ...form,
-            stock: e.target.value,
+            stock: Number(e.target.value),
           })
         }
         className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 border outline-none font-semibold"
@@ -359,11 +359,11 @@ export default function EditProduct() {
         step="1"
         value={form.price}
         onChange={(e) =>
-          setForm({
-            ...form,
-            price: e.target.value,
-          })
-        }
+  setForm({
+    ...form,
+    price: Number(e.target.value), // ✅ FIX
+  })
+}
         className="w-full border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 border outline-none font-bold text-blue-600"
       />
     </div>

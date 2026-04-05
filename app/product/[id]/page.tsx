@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+import { Loader2, ShoppingCart } from "lucide-react";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -9,6 +11,7 @@ export default function ProductDetail() {
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState("");
 
@@ -30,13 +33,118 @@ export default function ProductDetail() {
     if (id) fetchProduct();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Cargando producto...
-      </div>
-    );
+const addToCart = async (e: React.MouseEvent) => {
+  e.stopPropagation();
+
+  if (loading) return;
+
+  setLoading2(true);
+
+  try {
+    // 🔐 1️⃣ verificar sesión
+    let sessionRes = await fetch("/api/me", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!sessionRes.ok) {
+      const data = await sessionRes.json().catch(() => null);
+
+      if (sessionRes.status === 401 && data?.error === "TokenExpired") {
+        // 🔄 refrescar token
+        const refreshRes = await fetch("/api/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!refreshRes.ok) {
+          Swal.fire({
+            text: "Debes iniciar sesión",
+            icon: "info",
+            confirmButtonText: "Ok",
+          });
+          return;
+        }
+
+        // 🔁 reintentar obtener sesión
+        sessionRes = await fetch("/api/me", {
+          method: "GET",
+          credentials: "include",
+        });
+      } else {
+        Swal.fire({
+          text: "Debes iniciar sesión",
+          icon: "info",
+          confirmButtonText: "Ok",
+        });
+        return;
+      }
+    }
+
+    
+
+    const sessionData = await sessionRes.json();
+    const user = sessionData.user;
+
+    // 🛒 2️⃣ agregar al carrito
+    const res = await fetch("/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email: user.email,
+        productId: id,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error agregando producto");
+    }
+
+    Swal.fire({
+      text: "Producto agregado al carrito...",
+      icon: "success",
+      confirmButtonText: "Ok",
+    }).then(() => {
+      router.refresh();
+    });
+
+  } catch (error) {
+    Swal.fire({
+      text: error instanceof Error ? error.message : "Error agregando al carrito",
+      icon: "error",
+      confirmButtonText: "Ok",
+    });
+  } finally {
+    setLoading2(false);
   }
+};
+
+
+  if (loading) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+
+      {/* LOGO */}
+      <img
+        src="/DOVV.png"
+        alt="Logo"
+        className="w-28 h-auto object-contain animate-pulse"
+      />
+
+      {/* SPINNER */}
+      <div className="flex flex-col items-center gap-2 text-gray-600">
+        <Loader2 className="w-8 h-8 animate-spin text-[#00173D]" />
+        <p className="text-sm font-medium">Cargando productos...</p>
+      </div>
+
+    </div>
+  );
+}
 
   if (!product) return <div>Producto no encontrado</div>;
 
@@ -128,8 +236,25 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            <button className="flex-1 bg-[#00173D] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition">
-              Agregar al carrito
+            <button 
+            onClick={addToCart}
+            className="flex-1 bg-[#00173D] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition">
+              {loading2 ? (
+  
+    <div className="flex items-center gap-2 justify-center cursor-pointer">
+      <Loader2 className="animate-spin" />
+      Agregando...
+      </div>
+     
+      
+      ) : (
+        <>
+          <div className="flex items-center gap-2 justify-center cursor-pointer">
+  <ShoppingCart size={18} />
+  <span>Agregar al carrito</span>
+</div>
+        </>
+      )}
             </button>
           </div>
 
@@ -147,7 +272,7 @@ export default function ProductDetail() {
           </div>
 
           <p className="text-green-600 mt-4 font-medium">
-            ✔ En stock - Envío inmediato
+            ✔ En stock ({product.stock} unidades disponibles)
           </p>
 
         </div>

@@ -88,6 +88,7 @@ export async function PUT(
     part_type
   } = await req.json();
 console.log(price);
+console.log(stock);
   // 🔧 FORMAT MODELS
   const formattedModel =
     compatible_models && compatible_models.length > 0

@@ -11,7 +11,7 @@ type TokenPayload = {
 export async function GET() {
   console.log("GET /api/user/me - Verificando token...");
     const cookieStore = cookies();
-    const token = (await cookieStore).get("tokenTtech")?.value;
+    const token = (await cookieStore).get("tokenTDOV")?.value;
     if (!token) {
       return NextResponse.json(
         { error: "No autorizado" },

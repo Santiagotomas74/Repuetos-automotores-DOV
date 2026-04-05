@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 export async function POST() {
   const cookieStore = cookies();
 
-  (await cookieStore).set("tokenTtech", "", {
+  (await cookieStore).set("tokenTDOV", "", {
     httpOnly: true,
     expires: new Date(0),
     path: "/",

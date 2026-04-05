@@ -60,13 +60,13 @@ const accessToken = jwt.sign(
     });
 
     // 📧 Email visible para frontend
-    response.cookies.set("emailTech", user.email, {
+    response.cookies.set("emailDOV", user.email, {
       httpOnly: false,
       path: "/",
     });
 
  // 🔐 Access Token
-response.cookies.set("tokenTtech", accessToken, {
+response.cookies.set("tokenTDOV", accessToken, {
   httpOnly: true,
   secure: true,
   sameSite: "lax",
@@ -75,7 +75,7 @@ response.cookies.set("tokenTtech", accessToken, {
 });
 
     // 🔄 Refresh Token
-    response.cookies.set("refreshTokenTech", refreshToken, {
+    response.cookies.set("refreshTokenDOV", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",

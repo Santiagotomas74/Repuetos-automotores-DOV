@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart } from "lucide-react";
+import Swal from "sweetalert2";
 
 
 
@@ -15,11 +16,13 @@ const typeQuery = searchParams.get("type");
 const modelFromURL = searchParams.get("model");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(false);
 
   const [selectedModel, setSelectedModel] = useState("Todos");
   const [selectedType, setSelectedType] = useState("Todas");
   const [selectedPrice, setSelectedPrice] = useState("Todos");
   const [selectedBrand, setSelectedBrand] = useState("Todos");
+  const [user, setUser] = useState<{ email: string } | null>(null);
 
   // 🔥 FETCH REAL
 useEffect(() => {
@@ -129,6 +132,107 @@ const matchPrice =
   );
 });
 
+const addToCart = async (e: React.MouseEvent) => {
+  e.stopPropagation();
+
+  if (loading) return;
+
+  setLoading2(true);
+
+  try {
+  try {
+  // 1️⃣ verificar sesión
+  let sessionRes = await fetch("/api/me", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  let data = await sessionRes.json();
+
+  // 2️⃣ si el token expiró → refrescar
+  if (sessionRes.status === 401 && data.error === "TokenExpired") {
+
+    const refreshRes = await fetch("/api/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!refreshRes.ok) {
+      throw new Error("Refresh failed");
+    }
+
+    // 3️⃣ volver a intentar /api/me
+    sessionRes = await fetch("/api/me", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    data = await sessionRes.json();
+  }
+
+  // 4️⃣ si sigue fallando → usuario no logueado
+  if (!sessionRes.ok) {
+    Swal.fire({
+      text: "Debes iniciar sesión",
+      icon: "info",
+      confirmButtonText: "Ok",
+    });
+    return;
+  }
+
+  // 5️⃣ usuario válido
+  console.log("User:", data.user);
+  console.log("Datos de sesión:", data.user.email); // Verificar que el email esté presente
+  setUser({ email: data.user.email });
+
+
+} catch (error) {
+  console.error("Auth error:", error);
+}
+
+    
+    // 🛒 2️⃣ Agregar producto al carrito
+    const res = await fetch("/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // importante
+      body: JSON.stringify({
+        email: user?.email, // Usamos el email del usuario autenticado
+        productId: products[0]?.id, // 🔥 aquí va el ID del producto que quieres agregar
+        
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Error agregando producto");
+    }
+
+    Swal.fire({
+      text: "Producto agregado al carrito...",
+      icon: "success",
+      confirmButtonText: "Ok",
+    }).then(() => {
+      router.refresh(); // Refrescar para actualizar el contador del carrito
+      
+    }
+    );
+
+  } catch (error) {
+    
+
+    Swal.fire({
+      text: error instanceof Error ? error.message : "Error agregando al carrito",
+      icon: "error",
+      confirmButtonText: "Ok",
+    });
+  } finally {
+    setLoading2(false);
+  }
+};
 
 if (loading) {
   return (
@@ -150,6 +254,9 @@ if (loading) {
     </div>
   );
 }
+
+
+
   
    const clearFilters = () => {
   setSelectedModel("Todos");
@@ -164,7 +271,7 @@ if (loading) {
     <div className="min-h-screen bg-slate-50 pb-16 pt-[40px]">
 
       {/* HEADER */}
-      <header className="bg-[#00173D] text-white py-10 px-4">
+      <header className="bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55] text-white py-10 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold">
             Repuestos Originales Volkswagen
@@ -321,7 +428,7 @@ if (loading) {
 
     window.open(url, "_blank");
   }}
-  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
+  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition  cursor-pointer"
 >
   Consultar por WhatsApp
 </button>
@@ -333,13 +440,23 @@ if (loading) {
     </p>
 
     <button
-      onClick={(e) => {
-        e.stopPropagation();
-        console.log("Agregar al carrito");
-      }}
-      className="w-full bg-[#00173D] text-white py-2 rounded-lg"
+  onClick={addToCart}
+  disabled={loading2}
+      className="w-full bg-[#00173D] hover:bg-blue-900 text-white py-2 rounded-lg  cursor-pointer"
     >
-      Añadir al carrito
+        {loading2 ? (
+          <div className="flex items-center gap-2 justify-center">
+        <Loader2 size={18} className="animate-spin" />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 justify-center">
+  <ShoppingCart size={18} />
+  <span>Agregar al carrito</span>
+</div>
+        
+        
+      )}
+      
     </button>
   </>
 )}

@@ -3,7 +3,7 @@ import jwt, { TokenExpiredError } from "jsonwebtoken";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("tokenTtech")?.value;
+  const token = cookieStore.get("tokenTDOV")?.value;
   console.log("Token recibido en /api/user/me:", token);
 
   if (!token) {

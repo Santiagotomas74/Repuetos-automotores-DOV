@@ -14,7 +14,7 @@ export async function POST() {
     // 👇 ahora cookies es async
     const cookieStore = await cookies();
 
-    const refreshToken = cookieStore.get("refreshTokenTech")?.value;
+    const refreshToken = cookieStore.get("refreshTokenDOV")?.value;
     console.log("Refresh token recibido:", refreshToken);
 
     if (!refreshToken) {
@@ -41,7 +41,7 @@ export async function POST() {
     );
 
     // 🍪 guardar cookie
-    cookieStore.set("tokenTtech", newAccessToken, {
+    cookieStore.set("tokenTDOV", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

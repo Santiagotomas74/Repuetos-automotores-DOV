@@ -123,7 +123,7 @@ return (
 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
   <div>
     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-      Productos
+      Productos para vender
     </h1>
     <p className="text-sm text-gray-500">
       Gestiona tu catálogo

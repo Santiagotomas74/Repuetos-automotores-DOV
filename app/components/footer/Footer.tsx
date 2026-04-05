@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-      <footer className="bg-[#00173D] text-white pt-16 pb-8 px-6 font-sans border-t-4 border-blue-600">
+      <footer className="bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55] text-white pt-16 pb-8 px-6 font-sans border-t-4 border-blue-600">
         <div className="max-w-7xl mx-auto">
           
           {/* 🔝 SECCIÓN SUPERIOR: Info, Links, Contacto, Redes */}

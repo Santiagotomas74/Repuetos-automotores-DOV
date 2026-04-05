@@ -15,12 +15,13 @@ interface CartSidebarProps {
 
 interface CartItem {
   product_id: string;
+  oem_number: string;
   name: string;
-  memory: string;
-  color: string;
   price: number;
+  brand: string;
+  compatible_models: string[];
   quantity: number;
-  image_1: string;
+  image1: string;
   stock: number;
 }
 
@@ -59,6 +60,10 @@ const [checkoutStep, setCheckoutStep] = useState<
     postal_code: "",
     additional_info: "",
   });
+
+
+console.log(cartItems);
+
 
   const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
@@ -121,7 +126,7 @@ useEffect(() => {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          email: sessionData.user.email || getCookie("emailTech"),
+          email: sessionData.user.email || getCookie("emailDOV"),
         }),
       });
 
@@ -257,7 +262,7 @@ const updateQuantity = async (productId: string, newQuantity: number) => {
       },
       credentials: "include",
       body: JSON.stringify({
-        email: sessionData.user.email || getCookie("emailTech"),
+        email: sessionData.user.email || getCookie("emailDOV"),
         product_id
       }),
     });
@@ -333,7 +338,7 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        email: sessionData.user.email || getCookie("emailTech"),
+        email: sessionData.user.email || getCookie("emailDOV"),
         payment_method: paymentMethod,
         delivery_type: deliveryType,
         shipping_cost: deliveryType === "shipping" ? shippingCost : 0,
@@ -416,7 +421,7 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
   >
     {/* Imagen */}
     <img
-      src={item.image_1}
+      src={item.image1}
       alt={item.name}
       className="w-30 h-30 rounded-xl object-cover"
     />
@@ -426,11 +431,11 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
       <div className="flex justify-between">
         <div>
           <p className="font-semibold text-base text-gray-800">
-            {item.name}
+            {item.name} 
           </p>
           <p className="text-sm text-gray-500">
             {/* si tienes variante puedes ponerla aquí */}
-            {item.memory} {item.color}
+            {item.oem_number} {item.brand} {item.compatible_models.join(", ")}
           </p>
         </div>
 

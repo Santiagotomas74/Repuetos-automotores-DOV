@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -11,6 +13,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState("");
+  const [user, setUser] = useState<{ email: string } | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -30,13 +33,30 @@ export default function ProductDetail() {
     if (id) fetchProduct();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Cargando producto...
+  
+
+
+
+if (loading) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+
+      {/* LOGO */}
+      <img
+        src="/DOVV.png"
+        alt="Logo"
+        className="w-28 h-auto object-contain animate-pulse"
+      />
+
+      {/* SPINNER */}
+      <div className="flex flex-col items-center gap-2 text-gray-600">
+        <Loader2 className="w-8 h-8 animate-spin text-[#00173D]" />
+        <p className="text-sm font-medium">Cargando productos...</p>
       </div>
-    );
-  }
+
+    </div>
+  );
+}
 
   if (!product) return <div>Producto no encontrado</div>;
 
