@@ -41,6 +41,7 @@ export default function AdminShipping() {
     try {
       const res = await fetch("/api/admin/shipping");
       const data = await res.json();
+      console.log("Datos recibidos de /api/admin/shipping:", data);
       setOrders(data.orders);
       console.log("Pedidos cargados:", data.orders[0]?.address);
     } catch (err) {
@@ -111,7 +112,7 @@ export default function AdminShipping() {
     : "Entrega a domicilio"}
 </p>
                 <p>
-  <strong>Estado actual:</strong>{" "}
+  <strong>Estado actual del envio:</strong>{" "}
   {order.order_status === "dispatch"
     ? "Pendiente"
     : order.order_status === "in_transit"
@@ -215,7 +216,7 @@ export default function AdminShipping() {
   <strong>Productos:</strong>
   {order.items.map((item: any) => (
     <div key={item.product_id}>
-      {item.product_name} - Cantidad: {item.quantity} - Precio unitario: ${item.unit_price} - Memoria: {item.product_memory} - Color: {item.product_color}
+      {item.product_name} - Cantidad: {item.quantity} - Precio unitario: ${item.unit_price} - OEM: {item.product_oem_number} 
    
     </div>
   ))}

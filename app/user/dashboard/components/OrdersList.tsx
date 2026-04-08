@@ -61,18 +61,24 @@ export default function UserOrders() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "dispatch":
-        return "Pendiente de despacho";
-      case "in_transit":
-        return "En camino";
-      case "delivered":
-        return "Entregado";
-      default:
-        return status;
-    }
-  };
+const getStatusLabel = (status: string, deliveryType: string) => {
+  // 🔥 PRIORIDAD: retiro en local
+  if (deliveryType === "pickup") {
+    return "Pendiente de retiro en el local";
+  }
+
+  // 🚚 estados normales
+  switch (status) {
+    case "dispatch":
+      return "Pendiente de despacho";
+    case "in_transit":
+      return "En camino";
+    case "delivered":
+      return "Entregado";
+    default:
+      return status;
+  }
+};
 
   if (loading)
     return (
@@ -131,7 +137,7 @@ export default function UserOrders() {
                   order.order_status
                 )}`}
               >
-                {getStatusLabel(order.order_status)}
+                {getStatusLabel(order.order_status, order.delivery_type)}
               </span>
             </div>
 

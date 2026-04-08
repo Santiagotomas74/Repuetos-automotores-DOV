@@ -197,8 +197,9 @@ export default function UserDashboard() {
                 </div>
               </div>
             </section>
-
+  {/* COLUMNA DERECHA 
             {user && (
+              
               <AddressCard
                 address={user}
                 onAddressUpdated={(newAddress) =>
@@ -209,6 +210,7 @@ export default function UserDashboard() {
                 }
               />
             )}
+*/}
           </div>
 
           {/* COLUMNA DERECHA */}

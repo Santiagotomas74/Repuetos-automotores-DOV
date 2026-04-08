@@ -46,7 +46,7 @@ export async function sendOrderConfirmationEmail(
     .join("");
 
   await transporter.sendMail({
-    from: `"iPhone Store" <${process.env.EMAIL_USER}>`,
+    from: `"Dov Repuestos" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Confirmación de compra",
     html: `
@@ -96,7 +96,7 @@ export async function sendOrderConfirmationEmail(
 
         <div style="margin-top:30px;text-align:center;">
           <a 
-            href="https://tutienda.com/orders/${orderId}" 
+            href="https://repuetos-automotores-dov.vercel.app/orders/${orderId}" 
             style="
               background:black;
               color:white;
@@ -113,7 +113,7 @@ export async function sendOrderConfirmationEmail(
         <hr style="margin:40px 0;border:none;border-top:1px solid #eee;"/>
 
         <p style="font-size:12px;color:#999;text-align:center;">
-          © iPhone Store — Todos los derechos reservados
+          © Dov Repuestos — Todos los derechos reservados
         </p>
 
       </div>
@@ -129,7 +129,7 @@ export async function sendReceiptUploadedEmail(
   const admins = process.env.ADMIN_EMAILS?.split(",") || [];
 
   await transporter.sendMail({
-    from: `"iPhone Store" <${process.env.EMAIL_USER}>`,
+    from: `"Dov Repuestos" <${process.env.EMAIL_USER}>`,
     to: admins,
     subject: `Nuevo comprobante subido - Orden #${orderId}`,
     html: `
@@ -157,7 +157,7 @@ export async function sendReceiptUploadedEmail(
         </p>
         
           <a 
-          href="https://iphones-e-commerce.vercel.app/admin"
+          href="https://repuetos-automotores-dov.vercel.app/admin"
           style="
             background:black;
             color:white;
@@ -188,7 +188,7 @@ export async function sendAdminPaymentNotification(
   const admins = process.env.ADMIN_EMAILS?.split(",") || [];
 
   await transporter.sendMail({
-    from: `"iPhone Store" <${process.env.EMAIL_USER}>`,
+    from: `"Dov Repuestos" <${process.env.EMAIL_USER}>`,
     to: admins,
     subject: `💰 Pago acreditado - Orden #${orderId}`,
     html: `
@@ -203,7 +203,7 @@ export async function sendAdminPaymentNotification(
         <br/>
 
         <a 
-          href="https://iphones-e-commerce.vercel.app/admin"
+          href="https://repuetos-automotores-dov.vercel.app/admin"
           style="
             background:black;
             color:white;

@@ -81,9 +81,9 @@ export async function POST(req: Request) {
       const stockUpdate = await client.query(
         `
         UPDATE products
-        SET quantity = quantity - $2
+        SET stock = stock - $2
         WHERE id = $1
-        AND quantity >= $2
+        AND stock >= $2
         RETURNING id
         `,
         [item.product_id, item.quantity]
@@ -257,14 +257,14 @@ if (payment_method === "transfer") {
           ],
           external_reference: orderId.toString(),
           notification_url:
-            "https://iphones-e-commerce.vercel.app/api/webhooks/mercadopago",
+            "https://repuetos-automotores-dov.vercel.app/api/webhooks/mercadopago",
           back_urls: {
             success:
-              "https://iphones-e-commerce.vercel.app/checkout/success",
+              "https://repuetos-automotores-dov.vercel.app/checkout/success",
             failure:
-              "https://iphones-e-commerce.vercel.app/checkout/failure",
+              "https://repuetos-automotores-dov.vercel.app/checkout/failure",
             pending:
-              "https://iphones-e-commerce.vercel.app/checkout/pending",
+              "https://repuetos-automotores-dov.vercel.app/checkout/pending",
           },
           auto_return: "approved",
         },

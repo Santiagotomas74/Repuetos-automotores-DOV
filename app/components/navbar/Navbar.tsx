@@ -14,10 +14,13 @@ import CartSidebar from "./CartSidebar";
 import type { NavbarProps } from "./Navbar.types";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Navbar({ items, cartCount }: NavbarProps) {
   const router = useRouter();
-
+const pathname = usePathname();
+const isAdmin = pathname.startsWith("/admin");
+const isUser = pathname.startsWith("/user/dashboard");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -175,37 +178,39 @@ const handleSearch = () => {
           </div>
         </div>
 
-     {/* 🔍 SEARCH BAR */}
-<div className="bg-white py-3">
-  <div className="max-w-5xl mx-auto px-4 ">
-    
-    <div className="flex flex-col sm:flex-row items-stretch gap-2 bg-gray-100 rounded-xl p-2">
 
-      {/* INPUT */}
-      <div className="flex items-center flex-1 bg-white rounded-lg px-3">
-        <Search className="text-gray-500 mr-2 shrink-0" size={18} />
 
-        <input
-          type="text"
-          placeholder="Buscar por nombre, modelo o número OEM"
-          className="w-full py-2 outline-none text-sm sm:text-base text-gray-800"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+
+{!isAdmin && !isUser && (
+  <div className="bg-white py-3">
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="flex flex-col sm:flex-row items-stretch gap-2 bg-gray-100 rounded-xl p-2">
+
+        <div className="flex items-center flex-1 bg-white rounded-lg px-3">
+          <Search className="text-gray-500 mr-2 shrink-0" size={18} />
+
+          <input
+            type="text"
+            placeholder="Buscar por nombre, modelo o número OEM"
+            className="w-full py-2 outline-none text-sm sm:text-base text-gray-800"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <button
+          className="bg-[#0b2a5b] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#09214a] transition w-full sm:w-auto md:h-10"
+          onClick={handleSearch}
+        >
+          Buscar
+        </button>
+
       </div>
-
-      {/* BUTTON */}
-      <button
-        className="bg-[#0b2a5b] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#09214a] transition w-full sm:w-auto md:h-10"
-        onClick={handleSearch}
-      >
-        Buscar
-      </button>
-
     </div>
-
   </div>
-</div>
+)}
+
+  
 
       </nav>
 

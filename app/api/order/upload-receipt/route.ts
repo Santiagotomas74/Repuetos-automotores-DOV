@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const orderId = formData.get("orderId") as string | null;
+    const EXTRA_TIME_HOURS = Number(process.env.RECEIPT_EXTENSION_HOURS || 6);
 
     if (!file || !orderId) {
       return NextResponse.json(
@@ -85,14 +86,15 @@ export async function POST(req: Request) {
 
     const imageUrl = uploadResult.secure_url;
 
-    await query(
-      `UPDATE orders
-       SET payment_receipt_url = $1,
-           payment_status = 'receipt_uploaded',
-           updated_at = NOW()
-       WHERE id = $2`,
-      [imageUrl, orderId]
-    );
+  await query(
+  `UPDATE orders
+   SET payment_receipt_url = $1,
+       payment_status = 'receipt_uploaded',
+       expires_at = GREATEST(expires_at, NOW()) + INTERVAL '${EXTRA_TIME_HOURS} hours',
+       updated_at = NOW()
+   WHERE id = $2`,
+  [imageUrl, orderId]
+);
     await sendReceiptUploadedEmail(orderId, imageUrl);
 
     return NextResponse.json({

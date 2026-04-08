@@ -64,8 +64,9 @@ export async function GET() {
             json_build_object(
               'product_id', p.id,
               'product_name', p.name,
-              'product_memory', p.memory,
-              'product_color', p.color,
+              'product_oem_number', p.oem_number,
+              'product_brand', p.brand,
+              'product_oem_equivalents', p.oem_equivalents,
               'quantity', oi.quantity,
               'unit_price', oi.unit_price
             )

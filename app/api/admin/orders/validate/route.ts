@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         products.name,
         order_items.quantity,
         order_items.unit_price,
-        products.image_1 AS image
+        products.image1 AS image
       FROM order_items
       JOIN products ON products.id = order_items.product_id
       WHERE order_items.order_id = $1
