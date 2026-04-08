@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { refresh } from "next/cache";
 import { useEffect, useState } from "react";
 
 export default function AdminOrders() {
@@ -48,6 +49,7 @@ export default function AdminOrders() {
       console.error(error);
       alert("Error validando orden");
     } finally {
+      refresh();
       setValidatingId(null);
     }
   };
