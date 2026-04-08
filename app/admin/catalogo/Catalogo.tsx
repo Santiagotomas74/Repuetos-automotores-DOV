@@ -123,7 +123,7 @@ return (
 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
   <div>
     <h1 className="text-2xl md:text-3xl font-bold text-green-300">
-      Productos de catalogo
+      Productos a consultar
     </h1>
     <p className="text-sm text-gray-500">
       Gestiona tu catálogo
@@ -131,7 +131,7 @@ return (
   </div>
 
   <Link
-    href="/admin/products/new"
+    href="/admin/catalogo/new"
     className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-md active:scale-95 mb-2"
   >
     <Plus size={20} />

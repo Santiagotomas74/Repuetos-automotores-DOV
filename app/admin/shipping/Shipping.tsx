@@ -19,6 +19,7 @@ type Order = {
   total_amount: number;
   order_status: string;
   delivery_type: string;
+  payment_method: string;
   created_at: string;
   items: Array<{
     product_id: string;
@@ -105,9 +106,13 @@ export default function AdminShipping() {
                 <p><strong>Orden:</strong> {order.order_number}</p>
                 <p><strong>Cliente:</strong> {order.user_email}</p>
                 <p><strong>Total:</strong> ${order.total_amount}</p>
+                <p><strong>Metodo de pago:</strong> {order.payment_method === "Transfer" 
+                ? "Mercado Pago" 
+                : "Transferencia bancaria "}
+                </p>
                <p>
-  <strong>Tipo:</strong>{" "}
-  {order.delivery_type === "pickup"
+            <strong>Tipo:</strong>{" "}
+     {order.delivery_type === "pickup"
     ? "Retiro en local"
     : "Entrega a domicilio"}
 </p>

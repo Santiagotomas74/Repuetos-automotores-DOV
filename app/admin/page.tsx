@@ -121,7 +121,7 @@ const handleDelete = async (id: string) => {
       }`}
     >
       <FaWhatsapp size={18} />
-      Catalogo
+      A consultar
     </button>
 
     <button

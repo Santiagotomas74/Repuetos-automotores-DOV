@@ -9,6 +9,7 @@ export async function GET() {
         o.order_number,
         o.total_amount,
         o.order_status,
+        o.payment_method,
         o.delivery_type,
         o.created_at,
         u.email as user_email,
