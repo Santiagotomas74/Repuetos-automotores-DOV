@@ -64,6 +64,11 @@ const [checkoutStep, setCheckoutStep] = useState<
 
 console.log(cartItems);
 
+useEffect(() => {
+  if (!isOpen) {
+    setCheckoutStep(null);
+  }
+}, [isOpen]);
 
   const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
