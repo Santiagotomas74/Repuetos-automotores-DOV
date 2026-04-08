@@ -132,102 +132,78 @@ const matchPrice =
   );
 });
 
-const addToCart = async (e: React.MouseEvent) => {
+const addToCart = async (e: React.MouseEvent, product: any) => {
   e.stopPropagation();
 
-  if (loading) return;
+  if (loading2) return;
 
   setLoading2(true);
 
   try {
-  try {
-  // 1️⃣ verificar sesión
-  let sessionRes = await fetch("/api/me", {
-    method: "GET",
-    credentials: "include",
-  });
-
-  let data = await sessionRes.json();
-
-  // 2️⃣ si el token expiró → refrescar
-  if (sessionRes.status === 401 && data.error === "TokenExpired") {
-
-    const refreshRes = await fetch("/api/refresh", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (!refreshRes.ok) {
-      throw new Error("Refresh failed");
-    }
-
-    // 3️⃣ volver a intentar /api/me
-    sessionRes = await fetch("/api/me", {
+    // 🔐 AUTH
+    let sessionRes = await fetch("/api/me", {
       method: "GET",
       credentials: "include",
     });
 
-    data = await sessionRes.json();
-  }
+    let data = await sessionRes.json();
 
-  // 4️⃣ si sigue fallando → usuario no logueado
-  if (!sessionRes.ok) {
-    Swal.fire({
-      text: "Debes iniciar sesión",
-      icon: "info",
-      confirmButtonText: "Ok",
-    });
-    return;
-  }
+    if (sessionRes.status === 401 && data.error === "TokenExpired") {
+      const refreshRes = await fetch("/api/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
 
-  // 5️⃣ usuario válido
-  console.log("User:", data.user);
-  console.log("Datos de sesión:", data.user.email); // Verificar que el email esté presente
-  setUser({ email: data.user.email });
+      if (!refreshRes.ok) throw new Error("Refresh failed");
 
+      sessionRes = await fetch("/api/me", {
+        method: "GET",
+        credentials: "include",
+      });
 
-} catch (error) {
-  console.error("Auth error:", error);
-}
+      data = await sessionRes.json();
+    }
 
-    
-    // 🛒 2️⃣ Agregar producto al carrito
+    if (!sessionRes.ok) {
+      Swal.fire({
+        text: "Debes iniciar sesión",
+        icon: "info",
+      });
+      return;
+    }
+
+    const email = data.user.email;
+
+    // 🛒 AGREGAR PRODUCTO CORRECTO
     const res = await fetch("/api/cart/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // importante
+      credentials: "include",
       body: JSON.stringify({
-        email: user?.email, // Usamos el email del usuario autenticado
-        productId: products[0]?.id, // 🔥 aquí va el ID del producto que quieres agregar
-        
+        email,
+        productId: product.id, // 🔥 FIX REAL
       }),
     });
 
-    const data = await res.json();
+    const result = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || "Error agregando producto");
+      throw new Error(result.error || "Error agregando producto");
     }
 
     Swal.fire({
-      text: "Producto agregado al carrito...",
+      text: "Producto agregado al carrito",
       icon: "success",
-      confirmButtonText: "Ok",
-    }).then(() => {
-      router.refresh(); // Refrescar para actualizar el contador del carrito
-      
-    }
-    );
+    });
+
+    router.refresh();
 
   } catch (error) {
-    
-
     Swal.fire({
-      text: error instanceof Error ? error.message : "Error agregando al carrito",
+      text: error instanceof Error ? error.message : "Error",
       icon: "error",
-      confirmButtonText: "Ok",
     });
   } finally {
     setLoading2(false);
@@ -440,7 +416,7 @@ if (loading) {
     </p>
 
     <button
-  onClick={addToCart}
+  onClick={(e) => addToCart(e, product)}
   disabled={loading2}
       className="w-full bg-[#00173D] hover:bg-blue-900 text-white py-2 rounded-lg  cursor-pointer"
     >
