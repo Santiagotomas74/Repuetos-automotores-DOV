@@ -532,7 +532,7 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
                     >
                      <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-900 rounded-2xl   transition-colors">
-                  <Store size={24} />
+                  <Store size={24} className="text-white" />
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">Retiro en local</p>
@@ -551,7 +551,7 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
                     >
                      <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-900 rounded-2xl  transition-colors">
-                  <Truck size={24} />
+                  <Truck size={24}  className="text-white" />
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">Envío a domicilio</p>
