@@ -110,11 +110,15 @@ export default function AdminShipping() {
                 ? "Mercado Pago" 
                 : "Transferencia bancaria "}
                 </p>
-               <p>
+               <p   className={`px-3 py-1 rounded-lg ${
+                  order.delivery_type === "pickup"
+                    ? "bg-red-600 text-white"
+                    : "bg-green-600 text-white"
+                }`}>
             <strong>Tipo:</strong>{" "}
      {order.delivery_type === "pickup"
     ? "Retiro en local"
-    : "Entrega a domicilio"}
+    : "Entrega a domicilio 🚚 "}
 </p>
                 <p>
   <strong>Estado actual del envio:</strong>{" "}
@@ -153,7 +157,7 @@ export default function AdminShipping() {
                 onClick={() => updateStatus(order.id, "delivered")}
                 className={`px-4 py-2 rounded-lg ${
                   order.order_status === "delivered"
-                    ? "bg-green-600 text-white"
+                    ? "bg-red-600 text-white"
                     : "bg-gray-200"
                 }`}
               >

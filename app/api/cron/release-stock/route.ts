@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     for (const row of expiredTransfers.rows) {
       await client.query(
         `UPDATE products
-         SET quantity = quantity + $1
+         SET stock = stock + $1
          WHERE id = $2`,
         [row.quantity, row.product_id]
       );
@@ -70,7 +70,7 @@ export async function GET(req: Request) {
     for (const row of expiredMP.rows) {
       await client.query(
         `UPDATE products
-         SET quantity = quantity + $1
+         SET stock = stock + $1
          WHERE id = $2`,
         [row.quantity, row.product_id]
       );

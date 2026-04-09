@@ -86,7 +86,9 @@ export default function AdminFinance() {
                 {order.order_number}
               </p>
               <p className="text-sm text-gray-500">
-                {order.user_email}
+                {order.user_email} - {order.payment_method === "transfer"
+                  ? "Transferencia bancaria"
+                  : "Mercado Pago"}
               </p>
             </div>
 
