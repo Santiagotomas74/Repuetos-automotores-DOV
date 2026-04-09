@@ -2,7 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { UploadCloud, Image as ImageIcon, Save, ArrowLeft } from "lucide-react";
+import {
+  UploadCloud,
+  Image as ImageIcon,
+  ArrowLeft,
+} from "lucide-react";
 import Swal from "sweetalert2";
 
 type ImageField = "image1" | "image2" | "image3" | "image4";
@@ -26,6 +30,11 @@ export default function NewProduct() {
     image4: "",
   });
 
+  // 🔥 imágenes locales (preview)
+  const [localImages, setLocalImages] = useState<{
+    [key in ImageField]?: string;
+  }>({});
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
@@ -37,49 +46,82 @@ export default function NewProduct() {
     });
   };
 
-  const renderImageInput = (field: ImageField, label: string) => (
-    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition">
-      <div className="flex items-center gap-2 mb-3 text-gray-700">
-        <ImageIcon size={18} />
-        <label className="font-semibold text-sm uppercase tracking-wider">
-          {label}
-        </label>
-      </div>
+  // 🔥 manejar imagen subida
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: ImageField
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      {form[field] ? (
-        <div className="relative group w-full h-40 rounded-lg overflow-hidden border bg-white">
-          <img
-            src={form[field]}
-            alt="preview"
-            className="w-full h-full object-contain p-2"
-          />
+    const previewUrl = URL.createObjectURL(file);
 
-          <button
-            type="button"
-            onClick={() => setForm({ ...form, [field]: "" })}
-            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
-          >
-            ✕
-          </button>
+    setLocalImages((prev) => ({
+      ...prev,
+      [field]: previewUrl,
+    }));
+  };
+
+  const renderImageInput = (field: ImageField, label: string) => {
+    const imageSrc = localImages[field] || form[field];
+
+    return (
+      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition">
+        <div className="flex items-center gap-2 mb-3 text-gray-700">
+          <ImageIcon size={18} />
+          <label className="font-semibold text-sm uppercase tracking-wider">
+            {label}
+          </label>
         </div>
-      ) : (
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition">
-          <UploadCloud className="w-8 h-8 mb-2 text-gray-400" />
-          <span className="text-sm text-gray-500">Click para subir</span>
 
-          <input type="file" accept="image/*" className="hidden" />
-        </label>
-      )}
+        {imageSrc ? (
+          <div className="relative group w-full h-40 rounded-lg overflow-hidden border bg-white">
+            <img
+              src={imageSrc}
+              alt="preview"
+              className="w-full h-full object-cover"
+            />
 
-      <input
-        name={field}
-        placeholder="O pegar URL de imagen"
-        value={form[field]}
-        onChange={handleChange}
-        className="w-full mt-3 text-sm border border-gray-200 p-2 rounded bg-white focus:ring-1 focus:ring-blue-500 outline-none"
-      />
-    </div>
-  );
+            <button
+              type="button"
+              onClick={() => {
+                setForm({ ...form, [field]: "" });
+
+                setLocalImages((prev) => {
+                  const copy = { ...prev };
+                  delete copy[field];
+                  return copy;
+                });
+              }}
+              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition">
+            <UploadCloud className="w-8 h-8 mb-2 text-gray-400" />
+            <span className="text-sm text-gray-500">Click para subir</span>
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e, field)}
+            />
+          </label>
+        )}
+
+        <input
+          name={field}
+          placeholder="O pegar URL de imagen"
+          value={form[field]}
+          onChange={handleChange}
+          className="w-full mt-3 text-sm border border-gray-200 p-2 rounded bg-white focus:ring-1 focus:ring-blue-500 outline-none"
+        />
+      </div>
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +163,6 @@ export default function NewProduct() {
         icon: "success",
         title: "Producto creado",
         text: "El producto se creó correctamente",
-        confirmButtonColor: "#2563eb",
       });
 
       router.push("/admin");
@@ -131,7 +172,6 @@ export default function NewProduct() {
         icon: "error",
         title: "Error",
         text: "No se pudo crear el producto",
-        confirmButtonColor: "#dc2626",
       });
     } finally {
       setLoading(false);
@@ -160,40 +200,13 @@ export default function NewProduct() {
           {/* INFO */}
           <div className="bg-white rounded-2xl border p-6 space-y-4">
 
-            <input
-              name="oem_number"
-              placeholder="Número OEM"
-              value={form.oem_number}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-              required
-            />
+            <input name="oem_number" placeholder="Número OEM" value={form.oem_number} onChange={handleChange} className="w-full border p-2 rounded-lg" required />
 
-            <input
-              name="oem_equivalents"
-              placeholder="Equivalencias OEM (coma)"
-              value={form.oem_equivalents}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
+            <input name="oem_equivalents" placeholder="Equivalencias OEM (coma)" value={form.oem_equivalents} onChange={handleChange} className="w-full border p-2 rounded-lg" />
 
-            <input
-              name="name"
-              placeholder="Nombre del producto"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-              required
-            />
+            <input name="name" placeholder="Nombre del producto" value={form.name} onChange={handleChange} className="w-full border p-2 rounded-lg" required />
 
-            {/* 🔥 NUEVO */}
-            <select
-              name="part_type"
-              value={form.part_type}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-              required
-            >
+            <select name="part_type" value={form.part_type} onChange={handleChange} className="w-full border p-2 rounded-lg" required>
               <option value="">Tipo de repuesto</option>
               <option value="Motor">Motor</option>
               <option value="Frenos">Frenos</option>
@@ -202,52 +215,16 @@ export default function NewProduct() {
               <option value="Filtros">Filtros</option>
             </select>
 
-            <input
-              name="brand"
-              placeholder="Marca (Ej: Volkswagen)"
-              value={form.brand}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-              required
-            />
+            <input name="brand" placeholder="Marca" value={form.brand} onChange={handleChange} className="w-full border p-2 rounded-lg" required />
 
-            <input
-              name="compatible_models"
-              placeholder="Modelos compatibles (Ej: Golf, Polo, Vento)"
-              value={form.compatible_models}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
+            <input name="compatible_models" placeholder="Modelos compatibles" value={form.compatible_models} onChange={handleChange} className="w-full border p-2 rounded-lg" />
 
             <div className="grid grid-cols-2 gap-4">
-              <input
-                name="stock"
-                type="number"
-                placeholder="Stock"
-                value={form.stock}
-                onChange={handleChange}
-                className="border p-2 rounded-lg"
-                required
-              />
-
-              <input
-                name="price"
-                type="number"
-                placeholder="Precio"
-                value={form.price}
-                onChange={handleChange}
-                className="border p-2 rounded-lg"
-                required
-              />
+              <input name="stock" type="number" placeholder="Stock" value={form.stock} onChange={handleChange} className="border p-2 rounded-lg" required />
+              <input name="price" type="number" placeholder="Precio" value={form.price} onChange={handleChange} className="border p-2 rounded-lg" required />
             </div>
 
-            <textarea
-              name="description"
-              placeholder="Descripción"
-              value={form.description}
-              onChange={handleChange}
-              className="w-full border p-2 rounded-lg"
-            />
+            <textarea name="description" placeholder="Descripción" value={form.description} onChange={handleChange} className="w-full border p-2 rounded-lg" />
           </div>
 
           {/* IMAGES */}
@@ -259,10 +236,7 @@ export default function NewProduct() {
           </div>
 
           {/* BUTTON */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-xl"
-          >
+          <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-xl">
             {loading ? "Creando..." : "Crear Producto"}
           </button>
         </form>
