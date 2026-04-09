@@ -60,15 +60,22 @@ export default function UserOrders() {
         return "bg-gray-100 text-gray-600";
     }
   };
-
 const getStatusLabel = (status: string, deliveryType: string) => {
-  // 🔥 PRIORIDAD: retiro en local
-  if (deliveryType === "pickup") {
+  const normalizedDelivery = deliveryType?.toLowerCase();
+  const normalizedStatus = status?.toLowerCase();
+
+  // ✅ caso especial: retiro completado
+  if (normalizedDelivery === "pickup" && normalizedStatus === "delivered") {
+    return "Retirado";
+  }
+
+  // 🔥 PRIORIDAD: retiro en local (pero no entregado)
+  if (normalizedDelivery === "pickup") {
     return "Pendiente de retiro en el local";
   }
 
   // 🚚 estados normales
-  switch (status) {
+  switch (normalizedStatus) {
     case "dispatch":
       return "Pendiente de despacho";
     case "in_transit":
