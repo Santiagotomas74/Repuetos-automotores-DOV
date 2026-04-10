@@ -41,24 +41,35 @@ export async function PATCH(
   const { id } = await context.params;
 
   try {
-    const { price } = await req.json();
+    
+    const { price, stock } = await req.json();
+    console.log("Datos recibidos en PATCH:", { price, stock });
 
-    if (price === undefined) {
+    if (price === undefined && stock === undefined) {
       return NextResponse.json(
-        { error: "Precio requerido" },
+        { error: "Precio o stock requerido" },
         { status: 400 }
       );
     }
 
-    await query(
-      `UPDATE products SET price = $1 WHERE id = $2`,
-      [price, id]
-    );
+    if (price !== undefined) {
+      await query(
+        `UPDATE products SET price = $1 WHERE id = $2`,
+        [price, id]
+      );
+    }
+
+    if (stock !== undefined) {
+      await query(
+        `UPDATE products SET stock = $1 WHERE id = $2`,
+        [stock, id]
+      );
+    }
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error("Error en PATCH price:", error);
+    console.error("Error en PATCH price or stock:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }

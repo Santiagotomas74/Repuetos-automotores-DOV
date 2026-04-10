@@ -18,7 +18,9 @@ export default function Products() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId2, setEditingId2] = useState<string | null>(null);
   const [newPrice, setNewPrice] = useState("");
+  const [newStock, setNewStock] = useState("");
   const [search, setSearch] = useState("");
   
 
@@ -82,6 +84,29 @@ export default function Products() {
     }
   };
   
+  const handleUpdateStock = async (id: string) => {
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stock: Number(newStock) }),
+      });
+  
+      if (!res.ok) throw new Error();
+  
+      setEditingId2(null);
+      setNewStock("");
+  
+      fetchProducts();
+  
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo actualizar el stock",
+      });
+    }
+  };
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
       title: "¿Eliminar producto?",
@@ -193,6 +218,7 @@ Cargando catálogo...
   </span>
 )}
 
+
                   <span className="text-xs text-gray-500">
                     Stock: {p.stock}
                   </span>
@@ -300,19 +326,40 @@ Cargando catálogo...
   )}
 </td>
 
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-semibold ${
+
+
+   <td className="px-6 py-4">
+  {editingId2 === p.id ? (
+    <input
+      type="number"
+      value={newStock}
+      autoFocus
+      onChange={(e) => setNewStock(e.target.value)}
+      onBlur={() => handleUpdateStock(p.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") handleUpdateStock(p.id);
+      }}
+      className="w-24 border rounded px-2 py-1"
+    />
+  ) : (
+    <span
+      onClick={() => {
+        setEditingId2(p.id);
+        setNewStock(p.stock);
+      }}
+      className={`px-2 py-1 rounded text-xs font-semibold ${
                       p.stock > 5
                         ? "bg-green-100 text-green-700"
                         : p.stock > 0
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-red-100 text-red-700"
                     }`}
-                  >
-                    {p.stock}
-                  </span>
-                </td>
+    >
+      {p.stock}
+    </span>
+  )}
+</td>
+  
 
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
