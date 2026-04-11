@@ -324,6 +324,7 @@ export default function EditProduct() {
         <option value="Suspensión">Suspensión</option>
         <option value="Electricidad">Electricidad</option>
         <option value="Filtros">Filtros</option>
+        <option value="Accesorios">Accesorios</option>
       </select>
     </div>
 

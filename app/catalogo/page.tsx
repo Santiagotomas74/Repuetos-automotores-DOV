@@ -305,7 +305,7 @@ if (loading) {
             {/* TIPO */}
             <div>
               <h3 className="font-semibold mb-3 text-black">Tipo de repuesto</h3>
-              {["Todas", "Motor", "Frenos", "Suspensión", "Electricidad", "Filtros"].map((t) => (
+              {["Todas", "Motor", "Frenos", "Suspensión", "Electricidad", "Filtros", "Accesorios"].map((t) => (
                 <label key={t} className="flex gap-2 text-sm text-black">
                   <input
                     type="radio"

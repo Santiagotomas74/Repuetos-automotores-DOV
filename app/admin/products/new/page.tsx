@@ -213,6 +213,7 @@ export default function NewProduct() {
               <option value="Suspensión">Suspensión</option>
               <option value="Electricidad">Electricidad</option>
               <option value="Filtros">Filtros</option>
+              <option value="Accesorios">Accesorios</option>
             </select>
 
             <input name="brand" placeholder="Marca" value={form.brand} onChange={handleChange} className="w-full border p-2 rounded-lg" required />
