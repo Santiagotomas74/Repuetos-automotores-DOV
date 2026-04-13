@@ -12,14 +12,14 @@ export default function Hero() {
         {/* LEFT */}
         <div className="space-y-6">
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mt-20">
             Repuestos <br />
-            Originales <br />
-            Volkswagen
+            Automotrices <br />
+            
           </h1>
 
           <p className="text-gray-200 text-sm md:text-base max-w-md">
-            Encuentra repuestos oficiales para tu Volkswagen con garantía y calidad original
+            Encuentra repuestos oficiales para tu Volkswagen, Chevrolet y Renault
           </p>
 
           <Link href="/catalogo">
@@ -34,7 +34,7 @@ export default function Hero() {
         <div className="flex justify-center md:justify-end">
           <div className="w-full max-w-md md:max-w-lg rounded-xl overflow-hidden shadow-lg">
             <Image
-              src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=400&fit=crop" // 👈 cambiá por tu imagen
+              src="/frente.png" // 👈 cambiá por tu imagen
               alt="Motor Volkswagen"
               width={600}
               height={400}

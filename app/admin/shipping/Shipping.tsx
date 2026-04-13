@@ -8,6 +8,7 @@ type Order = {
     street: string;
     number: string;
     city: string;
+    phone: string;
     province: string;
     postal_code: string;
     additional_info: string;
@@ -16,6 +17,7 @@ type Order = {
   id: string;
   order_number: string;
   user_email: string;
+  user_phone: string;
   total_amount: number;
   order_status: string;
   delivery_type: string;
@@ -42,7 +44,8 @@ export default function AdminShipping() {
     try {
       const res = await fetch("/api/admin/shipping");
       const data = await res.json();
-      console.log("Datos recibidos de /api/admin/shipping:", data);
+      console.log("Datos recibidos de /api/admin/shipping:", data.orders);
+
       setOrders(data.orders);
       console.log("Pedidos cargados:", data.orders[0]?.address);
     } catch (err) {
@@ -104,7 +107,7 @@ export default function AdminShipping() {
             <div className="flex justify-between">
               <div>
                 <p><strong>Orden:</strong> {order.order_number}</p>
-                <p><strong>Cliente:</strong> {order.user_email}</p>
+                <p><strong>Cliente:</strong> {order.user_email} {order.user_phone} </p>
                 <p><strong>Total:</strong> ${order.total_amount}</p>
                 <p><strong>Metodo de pago:</strong> {order.payment_method === "Transfer" 
                 ? "Mercado Pago" 
@@ -178,7 +181,7 @@ export default function AdminShipping() {
     {order.address.additional_info && (
       <p><em>Info adicional:</em> {order.address.additional_info}</p>
     )}
-    <p><strong>Cliente:</strong> {order.address.full_name}</p>
+    <p><strong>Cliente:</strong> {order.address.full_name} {order.address.phone} </p>
 
     <div className="flex gap-3">
               <button

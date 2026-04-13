@@ -100,7 +100,7 @@ const handleSearch = () => {
       <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-sm">
             {/* 🔵 TOP BAR */}
       <div className="bg-[#0b2a5b] text-white text-sm text-center py-2">
-        Repuestos originales Volkswagen - Envíos gratis en compras superiores a $50.000
+       Envíos gratis en Zona San Miguel - Compras seguras con Mercado Pago
       </div>
 
         {/* MAIN ROW */}
@@ -229,8 +229,8 @@ const handleSearch = () => {
         }`}
       >
         <div className="flex items-center justify-between p-5 border-b">
-          <span className="font-semibold">VW Parts</span>
-          <button onClick={() => setIsMenuOpen(false)}>
+          <span className="font-semibold text-black">DOV Repuestos</span>
+          <button onClick={() => setIsMenuOpen(false)} className="text-gray-700">
             <X size={20} />
           </button>
         </div>
@@ -249,11 +249,24 @@ const handleSearch = () => {
           ))}
         </ul>
 
-        <div className="border-t p-6">
+        <div className="border-t p-6 text-gray-700 ">
           {!isLoggedIn ? (
-            <Link href="/login">Iniciar sesión</Link>
+            <button onClick={() => {
+              handleLogout();
+              setIsMenuOpen(false);
+            }} 
+         
+            className="text-blue-500">
+              <a href="/login">
+              Iniciar sesión
+              </a>
+            </button>
+     
           ) : (
-            <button onClick={handleLogout} className="text-red-500">
+            <button onClick={() => {
+              handleLogout();
+              setIsMenuOpen(false);
+            }} className="text-red-500">
               Cerrar sesión
             </button>
           )}

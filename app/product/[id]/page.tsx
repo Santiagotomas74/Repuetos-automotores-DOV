@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Loader2, ShoppingCart } from "lucide-react";
+import FeaturedProducts from "@/app/components/FeaturedProducts";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -96,6 +97,7 @@ const addToCart = async (e: React.MouseEvent) => {
       body: JSON.stringify({
         email: user.email,
         productId: id,
+        quantity,
       }),
     });
 
@@ -151,12 +153,13 @@ const addToCart = async (e: React.MouseEvent) => {
   const images = [product.image1, product.image2, product.image3, product.image4].filter(Boolean);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 mt-10">
+    <>
+    <div className=" max-w-7xl mx-auto px-4 py-10 mt-10">
 
       {/* 🔙 VOLVER */}
       <button
         onClick={() => router.push("/catalogo")}
-        className="mb-6 text-sm text-blue-800 hover:underline"
+        className="mb-6 text-sm text-blue-800 hover:underline mt-13 sm:mt-0 md:mt-0"
       >
         ← Volver al catálogo
       </button>
@@ -255,9 +258,34 @@ const addToCart = async (e: React.MouseEvent) => {
 </div>
         </>
       )}
+
+      
             </button>
           </div>
 
+    <div className="flex items-center gap-4 mt-6">
+
+            <button
+  onClick={() => {
+    const phone = "5491127561595"; // 🔥 tu número (sin +, con 54 y 9)
+    
+    const message = `Hola! Estoy interesado en el producto:
+    
+🧩 ${product.name}
+🔧 OEM: ${product.oem_number}
+
+¿Podrían darme más información?`;
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, "_blank");
+  }}
+  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
+>
+  Consultar por WhatsApp
+</button>
+
+          </div>
           {/* FEATURES */}
           <div className="grid grid-cols-3 gap-4 mt-6 text-center text-sm">
             <div className="bg-gray-100 p-3 rounded-lg text-green-600 font-medium">
@@ -304,7 +332,8 @@ const addToCart = async (e: React.MouseEvent) => {
           </div>
         </div>
       </div>
-
     </div>
+     <FeaturedProducts />
+     </>
   );
 }

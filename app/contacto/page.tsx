@@ -1,7 +1,10 @@
 "use client";
 
+import { Phone, MapPin, Clock, MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+
 export default function ContactPage() {
-  const phone = "5491123456789"; // 🔥 tu número real
+  const phone = "5491127561595";
 
   const handleWhatsApp = () => {
     const message = `Hola! Me gustaría hacer una consulta sobre repuestos.`;
@@ -10,47 +13,76 @@ export default function ContactPage() {
   };
 
   return (
-    <div className=" bg-slate-900 py-12 px-4 mt-10">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <section className="bg-blue-600 py-16 px-4 mt-10">
+      <div className="max-w-6xl mx-auto">
 
-        {/* 📍 INFO */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border space-y-6">
+        {/* HEADER */}
+        <div className="text-center mb-12 mt-10 sm:mt-0 md:mt-0">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            Contactanos
+          </h2>
+          <p className="text-white mt-3">
+            Estamos para ayudarte con cualquier consulta sobre repuestos
+          </p>
+        </div>
 
-          <div>
-            <h1 className="text-2xl font-bold text-[#00173D] mb-2">
-              Nuestro Local
-            </h1>
-            <p className="text-gray-600">
-              Acercate o escribinos directamente por WhatsApp.
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+          {/* INFO */}
+          <div className="bg-white p-8 rounded-2xl shadow-md border space-y-6">
+
+            <h3 className="text-xl font-bold text-[#00173D]">
+              Información de contacto
+            </h3>
+
+            <div className="space-y-4 text-gray-700">
+
+              <div className="flex items-center gap-3">
+                <MapPin className="text-[#00AEEF]" />
+                <span>Buenos Aires, Argentina</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Phone className="text-[#00AEEF]" />
+                <span>(+54) 9 11 2756-1595</span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Clock className="text-[#00AEEF]" />
+                <span>Lunes a Viernes: 8AM - 7PM</span>
+                <span>Sábados: 9AM - 5PM</span>
+              </div>
+
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={handleWhatsApp}
+              className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition cursor-pointer"
+            >
+              <FaWhatsapp size={20} />
+              Escribir por WhatsApp
+            </button>
+            <img
+  src="/frente.png"
+  alt="imagen de la tienda"
+  className="w-150 h-64 object-cover"
+/>
+
           </div>
 
-          <div className="space-y-3 text-gray-700">
-            <p>📍 Dirección: Buenos Aires, Argentina</p>
-            <p>📞 Teléfono: +54 11 1234-5678</p>
-            <p>🕒 Horario: Lun a Vie de 9:00 a 18:00</p>
+          {/* MAPA */}
+          <div className="bg-white p-4 rounded-2xl shadow-md border">
+            <iframe
+              src="https://www.google.com/maps?q=REPUESTOS+DOV&output=embed"
+              className="w-full h-[520px] rounded-xl border-0"
+              loading="lazy"
+            ></iframe>
           </div>
-
-          {/* 📲 WHATSAPP */}
-          <button
-            onClick={handleWhatsApp}
-            className="w-full bg-[#25D366] text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer"
-          >
-            Contactar por WhatsApp
-          </button>
 
         </div>
 
-        {/* 🗺️ GOOGLE MAPS */}
-<div className="bg-white p-4 rounded-2xl shadow-sm border">
-  <iframe
-    src="https://www.google.com/maps?q=REPUESTOS+DOV&output=embed"
-    className="w-full h-[350px] rounded-xl border-0"
-    loading="lazy"
-  ></iframe>
-</div>
-
       </div>
-    </div>
+    </section>
   );
 }

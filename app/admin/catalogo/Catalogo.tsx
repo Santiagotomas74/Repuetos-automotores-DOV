@@ -169,33 +169,8 @@ Cargando catálogo...
                     {p.name}
                   </h2>
 
-                  {editingId === p.id ? (
-  <input
-    type="number"
-    value={newPrice}
-    autoFocus
-    onChange={(e) => setNewPrice(e.target.value)}
-    onBlur={() => handleUpdatePrice(p.id)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") handleUpdatePrice(p.id);
-    }}
-    className="border rounded px-2 py-1 text-sm w-24"
-  />
-) : (
-  <span
-    onClick={() => {
-      setEditingId(p.id);
-      setNewPrice(p.price);
-    }}
-    className="text-indigo-600 font-bold flex items-center text-sm cursor-pointer"
-  >
-    <DollarSign size={14} /> {p.price}
-  </span>
-)}
+                  
 
-                  <span className="text-xs text-gray-500">
-                    Stock: {p.stock}
-                  </span>
                 </div>
               </div>
             </div>

@@ -8,9 +8,9 @@ export default function Footer() {
             
             {/* Columna 1: Marca */}
             <div>
-              <h3 className="text-xl font-bold mb-4">Volkswagen Parts</h3>
+              <h3 className="text-xl font-bold mb-4">DOV Respuestos</h3>
               <p className="text-gray-300 text-sm leading-relaxed pr-4">
-                Distribuidor autorizado de repuestos originales Volkswagen con más de 10 años de experiencia en el mercado.
+                Distribuidor de repuestos Volkswagen, Chevrolet y Renault con más de 10 años de experiencia en el mercado.
               </p>
             </div>
   
@@ -21,7 +21,7 @@ export default function Footer() {
                 <li><a href="#" className="hover:text-white transition-colors">Términos y Condiciones</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Política de Privacidad</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Política de Devoluciones</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
+                
               </ul>
             </div>
   
@@ -29,9 +29,9 @@ export default function Footer() {
             <div>
               <h3 className="text-xl font-bold mb-4">Servicio al Cliente</h3>
               <ul className="space-y-3 text-sm text-gray-300">
-                <li>Lunes a Viernes: 9AM - 6PM</li>
-                <li>Sábados: 9AM - 2PM</li>
-                <li>Teléfono: (555) 123-4567</li>
+                <li>Lunes a Viernes: 8AM - 7PM</li>
+                <li>Sábados: 9AM - 5PM</li>
+                <li>Teléfono: (+54) 9 11 2756-1595</li>
                 <li>Email: info@vwparts.com</li>
               </ul>
             </div>
@@ -47,36 +47,59 @@ export default function Footer() {
                   </svg>
                 </a>
                 {/* Instagram */}
-                <a href="#" className="text-white hover:text-gray-300 transition-colors">
+                <a href="https://www.instagram.com/repuestos.dov/" className="text-white hover:text-gray-300 transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01" />
                   </svg>
                 </a>
-                {/* Twitter/X */}
-                <a href="#" className="text-white hover:text-gray-300 transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-                  </svg>
-                </a>
+             
               </div>
   
-              <h3 className="text-lg font-bold mb-3">Métodos de Pago</h3>
-              <div className="flex gap-2 text-white">
-                {/* Tarjetas genéricas SVG */}
-                <svg className="w-10 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-                <svg className="w-10 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-                <svg className="w-10 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </div>
+             <h3 className="text-lg font-bold mb-3">Métodos de Pago</h3>
+
+<div className="flex gap-3 text-white">
+
+  {/* Tarjeta */}
+  <svg className="w-10 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+    <rect width="20" height="14" x="2" y="5" rx="2" />
+    <path d="M2 10h20" />
+  </svg>
+
+  {/* Efectivo */}
+  <svg className="w-10 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+    <rect x="2" y="6" width="20" height="12" rx="2" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M6 10h.01M18 14h.01" />
+  </svg>
+
+ {/* Transferencia */}
+<svg
+  className="w-10 h-8"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth="1.5"
+  viewBox="0 0 24 24"
+>
+  {/* Tarjeta / cuenta */}
+  <rect x="2" y="6" width="20" height="16" rx="2" />
+
+  {/* Flecha hacia la derecha */}
+  <path
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    d="M8 12h8m0 0l-3-3m3 3l-3 3"
+  />
+
+  {/* Flecha hacia la izquierda */}
+  <path
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    d="M16 16H8m0 0l3-3m-3 3l3 3"
+  />
+</svg>
+
+</div>
             </div>
           </div>
   
@@ -86,13 +109,26 @@ export default function Footer() {
               
               {/* Beneficio 1 */}
               <div className="flex flex-col items-center justify-center">
-                <svg className="w-10 h-10 text-[#00AEEF] mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 21h8m-4-10v10m0 0a2 2 0 100-4 2 2 0 000 4zm9-12H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 3h5a2 2 0 012 2v4l-3 4" />
-                  <circle cx="7" cy="17" r="2" />
-                  <circle cx="17" cy="17" r="2" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13h18" />
-                </svg>
+                <svg
+  className="w-10 h-10 text-[#00AEEF] mb-3"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth="1.5"
+  viewBox="0 0 24 24"
+>
+  {/* Caja del camión */}
+  <rect x="1" y="6" width="14" height="10" rx="2" />
+
+  {/* Cabina */}
+  <path d="M15 10h4l3 3v3h-7z" />
+
+  {/* Ruedas */}
+  <circle cx="6" cy="18" r="2" />
+  <circle cx="18" cy="18" r="2" />
+
+  {/* Línea base */}
+  <path d="M1 16h21" />
+</svg>
                 <span className="font-semibold text-sm">Envíos a todo el país</span>
               </div>
   
@@ -127,7 +163,7 @@ export default function Footer() {
   
           {/* ⬇️ SECCIÓN INFERIOR: Copyright */}
           <div className="text-center text-gray-400 text-sm">
-            <p>© 2026 VW Parts. Distribuidor autorizado de repuestos Volkswagen. Todos los derechos reservados.</p>
+            <p>© 2026 DOV Repuestos. Distribuidor autorizado de repuestos Volkswagen, Chevrolet y Renault. Todos los derechos reservados.</p>
           </div>
   
         </div>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import FeaturedProducts from "@/app/components/FeaturedProducts";
+
 
 
 export default function ProductDetail() {
@@ -63,12 +65,13 @@ if (loading) {
   const images = [product.image1, product.image2, product.image3, product.image4].filter(Boolean);
 
   return (
+    <>
     <div className="max-w-7xl mx-auto px-4 py-10 mt-10 mb-2">
 
       {/* 🔙 VOLVER */}
       <button
         onClick={() => router.push("/catalogo")}
-        className="mb-6 text-sm text-blue-800 hover:underline"
+        className="mb-6 text-sm text-blue-800 hover:underline mt-13 sm:mt-0 md:mt-0"
       >
         ← Volver al catálogo
       </button>
@@ -158,7 +161,7 @@ if (loading) {
 
             <button
   onClick={() => {
-    const phone = "5491123456789"; // 🔥 tu número (sin +, con 54 y 9)
+    const phone = "5491127561595"; // 🔥 tu número (sin +, con 54 y 9)
     
     const message = `Hola! Estoy interesado en el producto:
     
@@ -184,5 +187,8 @@ if (loading) {
       
 
     </div>
+
+     <FeaturedProducts />
+         </>
   );
 }

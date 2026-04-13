@@ -83,7 +83,13 @@ export default function Login() {
       
       <div className="relative w-full md:w-1/2 h-[40vh] md:h-screen flex flex-col justify-center p-8 md:p-20 text-white overflow-hidden">
       
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+         <div 
+  className="absolute inset-0 bg-cover bg-center  animate-world" 
+  style={{ 
+    backgroundImage: "url('/frente.png')", // Cambia por tu imagen
+      
+  }}
+/>
         
         <div className="relative z-10 space-y-6">
           <div className="flex items-center gap-3">

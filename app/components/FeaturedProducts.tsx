@@ -21,7 +21,7 @@ export default function FeaturedProducts() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("api/products"); // tu endpoint
+        const res = await fetch("/api/products"); // tu endpoint
         const data: Product[] = await res.json();
         
 

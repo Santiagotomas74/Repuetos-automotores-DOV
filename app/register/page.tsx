@@ -100,7 +100,13 @@ export default function Register() {
 
        
 
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+          <div 
+  className="absolute inset-0 bg-cover bg-center  animate-world" 
+  style={{ 
+    backgroundImage: "url('/frente.png')", // Cambia por tu imagen
+      
+  }}
+/>
 
         <div className="relative z-10 space-y-6">
       

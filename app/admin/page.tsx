@@ -181,6 +181,18 @@ const handleDelete = async (id: string) => {
       Productos
     </button>
 
+        <button
+      onClick={() => setSection("catalogo")}
+      className={`flex flex-col items-center justify-center text-xs ${
+        section === "catalogo"
+          ? "text-indigo-600"
+          : "text-gray-500"
+      }`}
+    >
+      <FaWhatsapp size={20} />
+      A consultar
+    </button>
+
     <button
       onClick={() => setSection("orders")}
       className={`flex flex-col items-center justify-center text-xs ${

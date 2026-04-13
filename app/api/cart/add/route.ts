@@ -17,8 +17,9 @@ export async function POST(req: NextRequest) {
     const decoded: any = verify(token, process.env.JWT_SECRET!);
     const userId = decoded.id;
 
-    const { productId } = await req.json();
+    const { productId, quantity } = await req.json();
 
+    // ✅ Validaciones
     if (!productId) {
       return NextResponse.json(
         { error: "Producto requerido" },
@@ -26,9 +27,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!quantity || quantity <= 0) {
+      return NextResponse.json(
+        { error: "Cantidad inválida" },
+        { status: 400 }
+      );
+    }
+
     await client.query("BEGIN");
 
-    // 1️⃣ Verificar producto y stock
+    // 1️⃣ Verificar producto y stock (bloqueo para concurrencia)
     const productRes = await client.query(
       `SELECT stock FROM products WHERE id = $1 FOR UPDATE`,
       [productId]
@@ -71,8 +79,10 @@ export async function POST(req: NextRequest) {
 
     if (itemRes.rows.length > 0) {
       const currentQuantity = itemRes.rows[0].quantity;
+      const newQuantity = currentQuantity + quantity;
 
-      if (currentQuantity + 1 > stock) {
+      // ✅ Validar contra stock total
+      if (newQuantity > stock) {
         await client.query("ROLLBACK");
         return NextResponse.json(
           { error: "Stock insuficiente" },
@@ -82,23 +92,24 @@ export async function POST(req: NextRequest) {
 
       await client.query(
         `UPDATE cart_items
-         SET quantity = quantity + 1
-         WHERE id = $1`,
-        [itemRes.rows[0].id]
+         SET quantity = $1
+         WHERE id = $2`,
+        [newQuantity, itemRes.rows[0].id]
       );
     } else {
-      if (stock < 1) {
+      // ✅ Validar stock inicial
+      if (quantity > stock) {
         await client.query("ROLLBACK");
         return NextResponse.json(
-          { error: "Sin stock disponible" },
+          { error: "Stock insuficiente" },
           { status: 400 }
         );
       }
 
       await client.query(
         `INSERT INTO cart_items (cart_id, product_id, quantity)
-         VALUES ($1, $2, 1)`,
-        [cartId, productId]
+         VALUES ($1, $2, $3)`,
+        [cartId, productId, quantity]
       );
     }
 

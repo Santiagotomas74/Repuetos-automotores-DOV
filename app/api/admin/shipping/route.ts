@@ -13,6 +13,7 @@ export async function GET() {
         o.delivery_type,
         o.created_at,
         u.email as user_email,
+        u.phone as user_phone,
 
         -- Dirección (puede ser null si es retiro)
         json_build_object(
@@ -57,6 +58,7 @@ export async function GET() {
       GROUP BY 
         o.id,
         u.email,
+        u.phone,
         a.full_name,
         a.phone,
         a.street,

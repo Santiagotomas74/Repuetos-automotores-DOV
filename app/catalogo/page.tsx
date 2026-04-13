@@ -10,10 +10,11 @@ import Swal from "sweetalert2";
 
 export default function ProductsPage() {
   const router = useRouter();
-const searchParams = useSearchParams();
-const searchQuery = searchParams.get("search")?.toLowerCase() || "";
-const typeQuery = searchParams.get("type");
-const modelFromURL = searchParams.get("model");
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+  const typeQuery = searchParams.get("type");
+  const modelFromURL = searchParams.get("model");
+  const marca = searchParams.get("marca");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
@@ -95,6 +96,9 @@ useEffect(() => {
     brand.includes(searchQuery) ||
     type.includes(searchQuery);
 
+  //marca
+  const matchMarca = marca ? brandArray.includes(marca.toLowerCase()) : true;
+
   // 🔵 MODELO
   const matchModel =
     (selectedModel === "Todos" || modelsArray.includes(selectedModel)) &&
@@ -128,7 +132,8 @@ const matchPrice =
     matchModel &&
     matchType &&
     matchPrice &&
-    matchBrand
+    matchBrand &&
+    matchMarca
   );
 });
 
@@ -184,6 +189,7 @@ const addToCart = async (e: React.MouseEvent, product: any) => {
       body: JSON.stringify({
         email,
         productId: product.id, // 🔥 FIX REAL
+        quantity: 1, // 🔥 FIX REAL
       }),
     });
 
@@ -248,9 +254,9 @@ if (loading) {
 
       {/* HEADER */}
       <header className="bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55] text-white py-10 px-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto mt-15 sm:mt-0 md:mt-0">
           <h1 className="text-2xl md:text-3xl font-bold">
-            Repuestos Originales Volkswagen
+           Nuestros Repuestos 
           </h1>
           <p className="text-sm text-gray-300 mt-1">
             Encontramos {filteredProducts.length} productos
@@ -391,7 +397,7 @@ if (loading) {
 
        <button
   onClick={() => {
-    const phone = "5491123456789"; // 🔥 tu número (sin +, con 54 y 9)
+    const phone = "5491127561595"; // 🔥 tu número (sin +, con 54 y 9)
     
     const message = `Hola! Estoy interesado en el producto:
     

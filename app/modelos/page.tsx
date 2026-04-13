@@ -1,5 +1,5 @@
 "use client";
-
+import FeaturedProducts from "../components/FeaturedProducts";
 import { useRouter } from "next/navigation";
 
 const models = [
@@ -27,25 +27,28 @@ const models = [
     name: "Tiguan",
     image: "https://hips.hearstapps.com/hmg-prod/images/2026-volkswagen-tiguan-sel-r-line-turbo-avocado-pr-107-67fe9bc628452.jpg?crop=0.641xw:0.546xh;0.216xw,0.324xh&resize=2048:*",
   },
+
+
+
     {
-    name: "Golf",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-cbEyS2wFhQpTyUPfoVCioZwDklvHGmu6Bg&s",
+    name: "Bora",
+    image: "https://media.diariouno.com.ar/p/89b55f3795e0d0b3965800f99e990deb/adjuntos/298/imagenes/009/676/0009676600/1200x0/smart/volkswagen-sedan-auto.jpg",
   },
   {
-    name: "Amarok",
-    image: "https://http2.mlstatic.com/D_NQ_NP_911955-MLA80334559322_112024-F.jpg",
+    name: "Fox",
+    image: "https://elecodesunchales.com.ar/download/multimedia.normal.8b7c123a56f1f846.6e6f726d616c2e6a7067.jpg",
   },
   {
-    name: "Polo",
-    image: "https://i0.wp.com/automundo.com.ar/wp-content/uploads/2023/08/VW-Polo-3.jpg?fit=1200%2C800&ssl=1",
+    name: "Suran",
+    image: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijKuAAVoPz7gzYYWRvKrZPMT-VKepfJRGJZG_lEP5FqifgFj8A6d5673YLoPwdsPJjKE6RjFkuEvAXE-Agd6MAsl_b_zZhfV5T7klkj2N4H1XSqngpY_6qsuIzK3LiYG-pOlwoQf2Bltw/s1600-rw/Volkswagen-Suran-Track.jpg",
   },
   {
-    name: "Vento",
-    image: "https://acnews.blob.core.windows.net/imgnews/medium/NAZ_ac1c5b538b7c48eda87f73d3d66f481d.webp",
+    name: "Gol Trend",
+    image: "https://motormagazine.com.ar/wp-content/uploads/2016/03/vw-gol-trend-1.jpg",
   },
   {
-    name: "Passat",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREDW3abvk13xsOgoWGDIvt3C9ZoYE456hGoA&s",
+    name: "Voyage",
+    image: "https://www.autodato.com/wp-content/uploads/2012/10/Volkswagen-Voyage-2013-Argentina-01.jpg",
   },
   {
     name: "Tiguan",
@@ -61,6 +64,7 @@ export default function Models() {
   };
 
   return (
+    <>
     <section className="bg-[#f5f6f8] py-14 mt-10">
       <div className="max-w-7xl mx-auto px-4 text-center">
         
@@ -100,5 +104,7 @@ export default function Models() {
 
       </div>
     </section>
+      <FeaturedProducts />
+             </>
   );
 }
