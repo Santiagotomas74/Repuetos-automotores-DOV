@@ -19,7 +19,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-gray-200 text-sm md:text-base max-w-md">
-            Encuentra repuestos oficiales para tu Volkswagen, Chevrolet y Renault
+            Somos una casa de repuestos especializada en Linea Volkswagen, Chevrolet y Renault. Trabajamos tanto piezas originales como alternativas de excelente calidad. 
           </p>
 
           <Link href="/catalogo">

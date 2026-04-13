@@ -10,7 +10,7 @@ export default function Footer() {
             <div>
               <h3 className="text-xl font-bold mb-4">DOV Respuestos</h3>
               <p className="text-gray-300 text-sm leading-relaxed pr-4">
-                Distribuidor de repuestos Volkswagen, Chevrolet y Renault con más de 10 años de experiencia en el mercado.
+                Somos una casa de repuestos especializada en Linea Volkswagen, Chevrolet y Renault. Trabajamos tanto piezas originales como alternativas de excelente calidad. 
               </p>
             </div>
   
