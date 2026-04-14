@@ -40,7 +40,7 @@ export default function Login() {
       return;
     }
 
-    if (data.role === "admin") {
+    if (data.role === "admin" && email === "santiago_lucas1@hotmail.com" ||  email === "augustoda0202@gmail.com") {
       Swal.fire({
         icon: "success",
         title: "Bienvenido administrador",

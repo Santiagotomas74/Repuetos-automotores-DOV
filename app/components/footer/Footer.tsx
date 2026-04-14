@@ -31,7 +31,7 @@ export default function Footer() {
               <ul className="space-y-3 text-sm text-gray-300">
                 <li>Lunes a Viernes: 8AM - 7PM</li>
                 <li>Sábados: 9AM - 5PM</li>
-                <li>Teléfono: (+54) 9 11 2756-1595</li>
+                <li>Teléfono: (+54) 9 11 2756-1595 o (+54) 9 11 2742-4592</li>
                 <li>Email: info@vwparts.com</li>
               </ul>
             </div>

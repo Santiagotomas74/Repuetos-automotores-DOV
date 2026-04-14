@@ -21,6 +21,7 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
 const pathname = usePathname();
 const isAdmin = pathname.startsWith("/admin");
 const isUser = pathname.startsWith("/user/dashboard");
+  const [isAdmin2, setIsAdmin2] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -65,7 +66,7 @@ const handleSearch = () => {
         }
 
         const data = await res.json();
-
+if(isAdmin) setIsAdmin2(true);
         setUserName(data.full_name || data.email);
         setIsLoggedIn(true);
       } catch {
@@ -89,6 +90,7 @@ const handleSearch = () => {
     setUserName(null);
     router.refresh();
   };
+  
 
   if (loading) return null;
 
@@ -136,6 +138,16 @@ const handleSearch = () => {
                 </Link>
               </li>
             ))}
+            {isAdmin2  && (
+  <li key={"/admin"}>
+                <Link
+                  href={"/admin"}
+                  className="hover:text-black transition"
+                >
+                  Administracion
+                </Link>
+              </li>
+)}
           </ul>
 
           {/* RIGHT */}

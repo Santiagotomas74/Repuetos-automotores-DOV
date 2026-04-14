@@ -45,6 +45,7 @@ export default function ContactPage() {
               <div className="flex items-center gap-3">
                 <Phone className="text-[#00AEEF]" />
                 <span>(+54) 9 11 2756-1595</span>
+                <span>/ (+54) 9 11 2742-4592</span>
               </div>
 
               <div className="flex items-center gap-3">

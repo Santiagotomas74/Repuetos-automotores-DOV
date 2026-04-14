@@ -13,7 +13,7 @@ const navItems: NavbarProps["items"] = [
   { label: "Catalogo", href: "/catalogo" },
   { label: "Modelos", href: "/modelos" },
   { label: "Contacto", href: "/contacto" },
-  { label: "Administracion", href: "/admin" },
+ 
 
  
 ];

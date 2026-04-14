@@ -26,12 +26,20 @@ export function proxy(req: NextRequest) {
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as any;
 
-      // validación de admin
-      if (pathname.startsWith("/admin") && decoded.role !== "admin") {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
+      const allowedAdmins = [
+  "santiago_lucas1@hotmail.com",
+  "augustoda0202@gmail.com",
+];
 
-      return NextResponse.next();
+if (
+  pathname.startsWith("/admin") &&
+  !(
+    decoded.role === "admin" &&
+    allowedAdmins.includes(decoded.email)
+  )
+) {
+  return NextResponse.redirect(new URL("/", req.url));
+}
 
     } catch (error: any) {
 
