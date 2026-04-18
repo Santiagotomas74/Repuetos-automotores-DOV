@@ -1,13 +1,13 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { refresh } from "next/cache";
 import { useEffect, useState } from "react";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [validatingId, setValidatingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -37,33 +37,59 @@ export default function AdminOrders() {
 
       if (!res.ok) throw new Error("Error validando");
 
-      // 🔥 Actualizar UI
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? { ...o, payment_status: "approved", order_status: "dispatch" }
-            : o
-        )
-      );
+      // 🔥 SACAR de la lista
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
     } catch (error) {
       console.error(error);
       alert("Error validando orden");
     } finally {
-      refresh();
       setValidatingId(null);
     }
   };
 
-  if (loading) return <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-      <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
-      <p className="text-sm font-medium animate-pulse">
-        Cargando ordenes...
-      </p>
-    </div>;
+  const handleReject = async (orderId: string) => {
+    const confirmReject = confirm(
+      "¿Rechazar comprobante? El cliente podrá subir uno nuevo."
+    );
+
+    if (!confirmReject) return;
+
+    setRejectingId(orderId);
+
+    try {
+      const res = await fetch("/api/admin/orders/reject-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+
+      if (!res.ok) throw new Error("Error rechazando comprobante");
+
+      // 🔥 SACAR de la lista
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    } catch (error) {
+      console.error(error);
+      alert("Error rechazando comprobante");
+    } finally {
+      setRejectingId(null);
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
+        <p className="text-sm font-medium animate-pulse">
+          Cargando órdenes...
+        </p>
+      </div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto py-3 space-y-6 mb-15">
-      <h1 className="text-3xl font-bold">Órdenes Pendientes de Validación</h1>
+      <h1 className="text-3xl font-bold">
+        Órdenes Pendientes de Validación
+      </h1>
 
       {orders.length === 0 ? (
         <p>No hay órdenes pendientes.</p>
@@ -92,15 +118,27 @@ export default function AdminOrders() {
               )}
             </div>
 
-            <button
-              onClick={() => handleValidate(order.id)}
-              disabled={validatingId === order.id}
-              className="bg-black text-white px-6 py-2 rounded-lg hover:opacity-80 disabled:opacity-50"
-            >
-              {validatingId === order.id
-                ? "Validando..."
-                : "Validar pago"}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleValidate(order.id)}
+                disabled={validatingId === order.id}
+                className="bg-black text-white px-6 py-2 rounded-lg hover:opacity-80 disabled:opacity-50"
+              >
+                {validatingId === order.id
+                  ? "Validando..."
+                  : "Validar pago"}
+              </button>
+
+              <button
+                onClick={() => handleReject(order.id)}
+                disabled={rejectingId === order.id}
+                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:opacity-80 disabled:opacity-50"
+              >
+                {rejectingId === order.id
+                  ? "Rechazando..."
+                  : "Rechazar comprobante"}
+              </button>
+            </div>
           </div>
         ))
       )}

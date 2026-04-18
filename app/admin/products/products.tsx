@@ -1,36 +1,38 @@
-
 "use client";
 
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { Package } from "lucide-react";
-import { DollarSign } from "lucide-react";
-import { Pencil } from "lucide-react";  
-import { Trash2 } from "lucide-react";
-import { Plus } from "lucide-react";
-
+import {
+  Loader2,
+  Package,
+  DollarSign,
+  Pencil,
+  Trash2,
+  Plus,
+  EyeOff,
+} from "lucide-react";
 
 export default function Products() {
-
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingId2, setEditingId2] = useState<string | null>(null);
+
   const [newPrice, setNewPrice] = useState("");
   const [newStock, setNewStock] = useState("");
+
   const [search, setSearch] = useState("");
-  
 
   const fetchProducts = async () => {
     setLoading(true);
-    try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      setProducts(data);
 
+    try {
+      const res = await fetch("/api/admin/products");
+      const data = await res.json();
+
+      setProducts(data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -42,40 +44,49 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  //filtro
-  const filteredProducts = products.filter((p) => {
-  const query = search.toLowerCase();
+  // 🔥 filtro + deshabilitados primero
+  const filteredProducts = products
+    .filter((p) => {
+      const query = search.toLowerCase();
 
-  const name = p.name?.toLowerCase() || "";
-  const oem = p.oem_number?.toLowerCase() || "";
+      const name = p.name?.toLowerCase() || "";
+      const oem = p.oem_number?.toLowerCase() || "";
 
-  const oemEquivalents = Array.isArray(p.oem_equivalents)
-    ? p.oem_equivalents.join(" ").toLowerCase()
-    : p.oem_equivalents?.toLowerCase() || "";
+      const oemEquivalents = Array.isArray(p.oem_equivalents)
+        ? p.oem_equivalents.join(" ").toLowerCase()
+        : p.oem_equivalents?.toLowerCase() || "";
 
-  return (
-    name.includes(query) ||
-    oem.includes(query) ||
-    oemEquivalents.includes(query)
-  );
-});
+      return (
+        name.includes(query) ||
+        oem.includes(query) ||
+        oemEquivalents.includes(query)
+      );
+    })
+    .sort((a, b) => {
+      // disabled true arriba
+      if (a.disabled === b.disabled) return 0;
+      return a.disabled ? -1 : 1;
+    });
 
   const handleUpdatePrice = async (id: string) => {
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price: Number(newPrice) }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          price: Number(newPrice),
+        }),
       });
-  
+
       if (!res.ok) throw new Error();
-  
+
       setEditingId(null);
       setNewPrice("");
-  
+
       fetchProducts();
-  
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -83,30 +94,34 @@ export default function Products() {
       });
     }
   };
-  
+
   const handleUpdateStock = async (id: string) => {
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stock: Number(newStock) }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          stock: Number(newStock),
+        }),
       });
-  
+
       if (!res.ok) throw new Error();
-  
+
       setEditingId2(null);
       setNewStock("");
-  
+
       fetchProducts();
-  
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo actualizar el stock",
+        text: "No se pudo actualizar stock",
       });
     }
   };
+
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
       title: "¿Eliminar producto?",
@@ -117,280 +132,355 @@ export default function Products() {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`/api/products/${id}`, { method: "DELETE" });
-      await Swal.fire({
-        title: "Producto eliminado",
+      await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      fetchProducts();
+
+      Swal.fire({
         icon: "success",
-        timer: 1500,
+        title: "Eliminado",
+        timer: 1200,
         showConfirmButton: false,
       });
-      fetchProducts();
-    } catch (error) {
+    } catch {
       Swal.fire({
-        title: "Error",
-        text: "No se pudo eliminar el producto",
         icon: "error",
+        title: "Error",
+        text: "No se pudo eliminar",
       });
     }
   };
 
-return (
+  return (
+    <div className="max-w-5xl mx-auto mb-15">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Productos para vender
+          </h1>
 
-<div className="max-w-5xl mx-auto mb-15">
+          <p className="text-sm text-gray-500">
+            Gestiona tu catálogo
+          </p>
+        </div>
 
-{/* Header */}
-<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ">
-  <div>
-    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-      Productos para vender
-    </h1>
-    <p className="text-sm text-gray-500">
-      Gestiona tu catálogo
-    </p>
-  </div>
-
-  <Link
-    href="/admin/products/new"
-    className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-md active:scale-95 mb-2"
-  >
-    <Plus size={20} />
-    Crear Producto
-  </Link>
-</div>
-
-{/* Contenedor */}
-<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-  {loading ? (
-
-<div className="flex flex-col items-center justify-center py-16 text-gray-500">
-<Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
-<p className="text-sm font-medium animate-pulse">
-Cargando catálogo...
-</p>
-</div>
-  
-  ) : products.length > 0 ? (
-    <>
-
-      {/* MOBILE */}
-      <div className="block md:hidden divide-y divide-gray-100">
-        {filteredProducts.map((p: any) => (
-          <div key={p.id} className="p-4 flex flex-col gap-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
-                  <Package size={20} />
-                </div>
-
-                <div>
-                  <h2 className="font-semibold text-gray-900">
-                    {p.name}
-                  </h2>
-
-                  {editingId === p.id ? (
-  <input
-    type="number"
-    value={newPrice}
-    autoFocus
-    onChange={(e) => setNewPrice(e.target.value)}
-    onBlur={() => handleUpdatePrice(p.id)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") handleUpdatePrice(p.id);
-    }}
-    className="border rounded px-2 py-1 text-sm w-24"
-  />
-) : (
-  <span
-    onClick={() => {
-      setEditingId(p.id);
-      setNewPrice(p.price);
-    }}
-    className="text-indigo-600 font-bold flex items-center text-sm cursor-pointer"
-  >
-    <DollarSign size={14} /> {p.price}
-  </span>
-)}
-
-
-                  <span className="text-xs text-gray-500">
-                    Stock: {p.stock}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-1">
-              <Link
-                href={`/admin/products/${p.id}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-700 py-2 rounded-lg text-sm font-medium border border-gray-200"
-              >
-                <Pencil size={16} />
-                Editar
-              </Link>
-
-              <button
-                onClick={() => handleDelete(p.id)}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 py-2 rounded-lg text-sm font-medium border border-red-100"
-              >
-                <Trash2 size={16} />
-                Borrar
-              </button>
-            </div>
-          </div>
-        ))}
+        <Link
+          href="/admin/products/new"
+          className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-md"
+        >
+          <Plus size={20} />
+          Crear Producto
+        </Link>
       </div>
 
- {/* DESKTOP */}
-   {/* 🔍 SEARCH */}
-<div className="mb-4 mt-4 ml-4">
-  <input
-    type="text"
-    placeholder="Buscar por nombre o número OEM..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    className="w-full md:w-80 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-  />
-</div>
-     
-      <div className="hidden md:block">
-      
+      {/* CONTENEDOR */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-4">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
+            <p className="text-sm font-medium animate-pulse">
+              Cargando catálogo...
+            </p>
+          </div>
+        ) : products.length > 0 ? (
+          <>
+            {/* SEARCH */}
+            <div className="p-4 border-b">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o número OEM..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full md:w-80 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
 
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Producto
-              </th>
-
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Precio
-              </th>
-
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Stock
-              </th>
-
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-100">
-            {filteredProducts.map((p: any) => (
-              <tr
-                key={p.id}
-                className="hover:bg-gray-50 transition-colors"
-              >
-                <td className="px-6 py-4">
+            {/* MOBILE */}
+            <div className="block md:hidden divide-y divide-gray-100">
+              {filteredProducts.map((p) => (
+                <div
+                  key={p.id}
+                  className={`p-4 space-y-3 ${
+                    p.disabled
+                      ? "bg-red-50 border-l-4 border-red-500"
+                      : ""
+                  }`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                      <Package size={16} />
+                    <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                      <Package size={18} />
                     </div>
-                    <span className="font-medium text-gray-900">
-                      {p.name}
-                    </span>
+
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="font-semibold text-gray-900">
+                          {p.name}
+                        </h2>
+
+                        {p.disabled && (
+                          <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <EyeOff size={12} />
+                            Deshabilitado
+                          </span>
+                        )}
+                      </div>
+
+                      {/* PRECIO */}
+                      {editingId === p.id ? (
+                        <input
+                          type="number"
+                          value={newPrice}
+                          autoFocus
+                          onChange={(e) =>
+                            setNewPrice(e.target.value)
+                          }
+                          onBlur={() =>
+                            handleUpdatePrice(p.id)
+                          }
+                          onKeyDown={(e) =>
+                            e.key === "Enter" &&
+                            handleUpdatePrice(p.id)
+                          }
+                          className="border rounded px-2 py-1 mt-2 w-24"
+                        />
+                      ) : (
+                        <span
+                          onClick={() => {
+                            setEditingId(p.id);
+                            setNewPrice(p.price);
+                          }}
+                          className="text-indigo-600 font-bold flex items-center text-sm cursor-pointer mt-1"
+                        >
+                          <DollarSign size={14} />
+                          {p.price}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </td>
 
-                <td className="px-6 py-4">
-  {editingId === p.id ? (
-    <input
-      type="number"
-      value={newPrice}
-      autoFocus
-      onChange={(e) => setNewPrice(e.target.value)}
-      onBlur={() => handleUpdatePrice(p.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") handleUpdatePrice(p.id);
-      }}
-      className="w-24 border rounded px-2 py-1"
-    />
-  ) : (
-    <span
-      onClick={() => {
-        setEditingId(p.id);
-        setNewPrice(p.price);
-      }}
-      className="cursor-pointer hover:text-indigo-600 font-semibold"
-    >
-      ${p.price}
-    </span>
-  )}
-</td>
+                  {/* STOCK */}
+                  <div>
+                    {editingId2 === p.id ? (
+                      <input
+                        type="number"
+                        value={newStock}
+                        autoFocus
+                        onChange={(e) =>
+                          setNewStock(e.target.value)
+                        }
+                        onBlur={() =>
+                          handleUpdateStock(p.id)
+                        }
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          handleUpdateStock(p.id)
+                        }
+                        className="border rounded px-2 py-1 w-24"
+                      />
+                    ) : (
+                      <span
+                        onClick={() => {
+                          setEditingId2(p.id);
+                          setNewStock(p.stock);
+                        }}
+                        className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer ${
+                          p.stock > 5
+                            ? "bg-green-100 text-green-700"
+                            : p.stock > 0
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        Stock: {p.stock}
+                      </span>
+                    )}
+                  </div>
 
-
-
-   <td className="px-6 py-4">
-  {editingId2 === p.id ? (
-    <input
-      type="number"
-      value={newStock}
-      autoFocus
-      onChange={(e) => setNewStock(e.target.value)}
-      onBlur={() => handleUpdateStock(p.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") handleUpdateStock(p.id);
-      }}
-      className="w-24 border rounded px-2 py-1"
-    />
-  ) : (
-    <span
-      onClick={() => {
-        setEditingId2(p.id);
-        setNewStock(p.stock);
-      }}
-      className={`px-2 py-1 rounded text-xs font-semibold ${
-                      p.stock > 5
-                        ? "bg-green-100 text-green-700"
-                        : p.stock > 0
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-    >
-      {p.stock}
-    </span>
-  )}
-</td>
-  
-
-                <td className="px-6 py-4 text-right">
-                  <div className="flex justify-end gap-2">
+                  {/* ACTIONS */}
+                  <div className="flex gap-2">
                     <Link
                       href={`/admin/products/${p.id}`}
-                      className="p-2 text-gray-400 hover:text-indigo-600"
+                      className="flex-1 bg-gray-50 border rounded-lg py-2 text-center text-sm"
                     >
-                      <Pencil size={18} />
+                      Editar
                     </Link>
 
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-2 text-gray-400 hover:text-red-600"
+                      className="flex-1 bg-red-50 border border-red-100 text-red-600 rounded-lg py-2 text-sm"
                     >
-                      <Trash2 size={18} />
+                      Borrar
                     </button>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  ) : (
-    <div className="p-16 text-center text-gray-400">
-      No hay productos.
-    </div>
-  )}
+                </div>
+              ))}
+            </div>
 
-</div>
+            {/* DESKTOP */}
+            <div className="hidden md:block">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-4 text-xs uppercase text-gray-500">
+                      Producto
+                    </th>
+
+                    <th className="px-6 py-4 text-xs uppercase text-gray-500">
+                      Precio
+                    </th>
+
+                    <th className="px-6 py-4 text-xs uppercase text-gray-500">
+                      Stock
+                    </th>
+
+                    <th className="px-6 py-4 text-xs uppercase text-gray-500 text-right">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-gray-100">
+                  {filteredProducts.map((p) => (
+                    <tr
+                      key={p.id}
+                      className={`hover:bg-gray-50 ${
+                        p.disabled
+                          ? "bg-red-50"
+                          : ""
+                      }`}
+                    >
+                      {/* PRODUCTO */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+                            <Package size={16} />
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">
+                                {p.name}
+                              </span>
+
+                              {p.disabled && (
+                                <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                  <EyeOff size={12} />
+                                  Deshabilitado
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* PRECIO */}
+                      <td className="px-6 py-4">
+                        {editingId === p.id ? (
+                          <input
+                            type="number"
+                            value={newPrice}
+                            autoFocus
+                            onChange={(e) =>
+                              setNewPrice(e.target.value)
+                            }
+                            onBlur={() =>
+                              handleUpdatePrice(p.id)
+                            }
+                            onKeyDown={(e) =>
+                              e.key === "Enter" &&
+                              handleUpdatePrice(p.id)
+                            }
+                            className="w-24 border rounded px-2 py-1"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => {
+                              setEditingId(p.id);
+                              setNewPrice(p.price);
+                            }}
+                            className="cursor-pointer hover:text-indigo-600 font-semibold"
+                          >
+                            ${p.price}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* STOCK */}
+                      <td className="px-6 py-4">
+                        {editingId2 === p.id ? (
+                          <input
+                            type="number"
+                            value={newStock}
+                            autoFocus
+                            onChange={(e) =>
+                              setNewStock(e.target.value)
+                            }
+                            onBlur={() =>
+                              handleUpdateStock(p.id)
+                            }
+                            onKeyDown={(e) =>
+                              e.key === "Enter" &&
+                              handleUpdateStock(p.id)
+                            }
+                            className="w-24 border rounded px-2 py-1"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => {
+                              setEditingId2(p.id);
+                              setNewStock(p.stock);
+                            }}
+                            className={`px-2 py-1 rounded text-xs font-semibold cursor-pointer ${
+                              p.stock > 5
+                                ? "bg-green-100 text-green-700"
+                                : p.stock > 0
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {p.stock}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* ACTIONS */}
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/admin/products/${p.id}`}
+                            className="p-2 text-gray-400 hover:text-indigo-600"
+                          >
+                            <Pencil size={18} />
+                          </Link>
+
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="p-2 text-gray-400 hover:text-red-600"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <div className="p-16 text-center text-gray-400">
+            No hay productos.
+          </div>
+        )}
+      </div>
     </div>
-)
+  );
 }

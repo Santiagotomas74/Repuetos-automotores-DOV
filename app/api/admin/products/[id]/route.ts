@@ -9,11 +9,8 @@ export async function GET(
   const { id } = await context.params;
 
   try {
-    console.log("ID recibido en GET:", id);
-
-    const { rows } = await query(`
-      SELECT * FROM products WHERE id = $1
-      `,
+    const { rows } = await query(
+      `SELECT * FROM products WHERE id = $1`,
       [id]
     );
 
@@ -28,6 +25,7 @@ export async function GET(
 
   } catch (error) {
     console.error("Error en GET product:", error);
+
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
@@ -35,6 +33,7 @@ export async function GET(
   }
 }
 
+// 🔥 PATCH precio / stock / disabled
 export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -42,13 +41,15 @@ export async function PATCH(
   const { id } = await context.params;
 
   try {
-    
-    const { price, stock } = await req.json();
-    console.log("Datos recibidos en PATCH:", { price, stock });
+    const { price, stock, disabled } = await req.json();
 
-    if (price === undefined && stock === undefined) {
+    if (
+      price === undefined &&
+      stock === undefined &&
+      disabled === undefined
+    ) {
       return NextResponse.json(
-        { error: "Precio o stock requerido" },
+        { error: "Nada para actualizar" },
         { status: 400 }
       );
     }
@@ -67,10 +68,18 @@ export async function PATCH(
       );
     }
 
+    if (disabled !== undefined) {
+      await query(
+        `UPDATE products SET disabled = $1 WHERE id = $2`,
+        [disabled, id]
+      );
+    }
+
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error("Error en PATCH price or stock:", error);
+    console.error("Error en PATCH product:", error);
+
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
@@ -78,6 +87,7 @@ export async function PATCH(
   }
 }
 
+// 🔹 PUT editar producto completo
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -99,9 +109,7 @@ export async function PUT(
     compatible_models,
     part_type
   } = await req.json();
-console.log(price);
-console.log(stock);
-  // 🔧 FORMAT MODELS
+
   const formattedModel =
     compatible_models && compatible_models.length > 0
       ? Array.isArray(compatible_models)
@@ -112,7 +120,6 @@ console.log(stock);
             .filter((m: string) => m.length > 0)
       : null;
 
-  // 🔧 FORMAT OEM
   const formattedOEM =
     oem_equivalents && oem_equivalents.length > 0
       ? Array.isArray(oem_equivalents)
@@ -144,7 +151,7 @@ console.log(stock);
        RETURNING *`,
       [
         oem_number,
-        formattedOEM,       // 🔥 FIX
+        formattedOEM,
         name,
         stock,
         description,
@@ -154,7 +161,7 @@ console.log(stock);
         image3,
         image4,
         brand,
-        formattedModel,     // 🔥 FIX
+        formattedModel,
         part_type,
         id,
       ]
@@ -172,17 +179,24 @@ console.log(stock);
   }
 }
 
+// 🔹 DELETE producto
 export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
 
-  try { 
-      await query(`DELETE FROM products WHERE id=$1`, [id]);
-    return NextResponse.json({ success: true }, { status: 200 }   );
+  try {
+    await query(`DELETE FROM products WHERE id = $1`, [id]);
+
+    return NextResponse.json(
+      { success: true },
+      { status: 200 }
+    );
+
   } catch (error) {
     console.error("Error en DELETE product:", error);
+
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }

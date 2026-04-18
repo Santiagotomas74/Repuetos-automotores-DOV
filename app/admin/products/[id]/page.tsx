@@ -11,7 +11,9 @@ import {
   Smartphone, 
   Hash, 
   Palette, 
-  DollarSign 
+  DollarSign, 
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Swal from "sweetalert2";
 type ImageField = "image1" | "image2" | "image3"| "image4";
@@ -22,6 +24,7 @@ export default function EditProduct() {
 
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [updatingDisabled, setUpdatingDisabled] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -36,7 +39,8 @@ export default function EditProduct() {
     image4: "",
     brand: "",
   compatible_models: "",
-  part_type: ""
+  part_type: "",
+  disabled: false,
   });
 
   
@@ -73,7 +77,7 @@ export default function EditProduct() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`/api/products/${id}`);
+        const res = await fetch(`/api/admin/products/${id}`);
         if (!res.ok) throw new Error("Producto no encontrado");
         const data = await res.json();
         console.log("Producto cargado:", data);
@@ -91,7 +95,8 @@ export default function EditProduct() {
           image4: data.image4 || "",
           brand: data.brand || "",
           compatible_models: data.compatible_models || "",
-          part_type: data.part_type || ""
+          part_type: data.part_type || "",
+          disabled: data.disabled || false,
         });
         setLoading(false);
       } catch (error) {
@@ -139,7 +144,40 @@ export default function EditProduct() {
     setIsSubmitting(false);
   }
 };
+  const handleToggleDisabled = async () => {
+    setUpdatingDisabled(true);
 
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          disabled: !form.disabled,
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      setForm((prev) => ({
+        ...prev,
+        disabled: !prev.disabled,
+      }));
+
+      Swal.fire(
+        "Actualizado",
+        !form.disabled
+          ? "Producto deshabilitado"
+          : "Producto habilitado",
+        "success"
+      );
+    } catch {
+      Swal.fire("Error", "No se pudo cambiar estado", "error");
+    } finally {
+      setUpdatingDisabled(false);
+    }
+  };
  
   const renderImageInput = (field: ImageField, label: string) => (
     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-colors">
@@ -208,13 +246,50 @@ export default function EditProduct() {
             <h1 className="text-3xl font-extrabold text-gray-900 tracking-wide">Editar Producto</h1>
           </div>
         </div>
+{/* BOTON HABILITAR / DESHABILITAR */}
+<div className="flex justify-end mb-6">
+
+
+          <button
+            type="button"
+            disabled={updatingDisabled}
+            onClick={handleToggleDisabled}
+            className={`px-5 py-3 rounded-xl font-semibold text-white flex items-center gap-2 ${
+              form.disabled
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-red-600 hover:bg-red-700"
+            }`}
+          >
+            {form.disabled ? (
+              <>
+                <Eye size={18} />
+                Habilitar Producto
+              </>
+            ) : (
+              <>
+                <EyeOff size={18} />
+                Deshabilitar Producto
+              </>
+            )}
+          </button>
+          </div>
+      
+
 
         <form onSubmit={handleSubmit} className="space-y-6">
          {/* Card: Información General */}
 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+         {/* ALERTA */}
+        {form.disabled && (
+          <div className="mb-6 bg-red-100 text-red-700 border border-red-300 rounded-xl p-4 font-medium">
+            ⚠ Este producto está DESHABILITADO y no se muestra en la tienda.
+          </div>
+        )}
   <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-2">
     Información Principal
   </h2>
+
+ 
 
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 

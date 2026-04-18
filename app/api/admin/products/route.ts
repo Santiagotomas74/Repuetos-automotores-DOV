@@ -4,7 +4,6 @@ import { query } from "@/db";
 export async function GET() {
   const { rows } = await query(`
     SELECT * FROM products
-    WHERE disabled = false
     ORDER BY id ASC;
   `);
 
