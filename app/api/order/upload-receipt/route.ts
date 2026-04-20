@@ -3,7 +3,6 @@ import { query } from "@/db";
 import { v2 as cloudinary } from "cloudinary";
 import { sendReceiptUploadedEmail } from "@/lib/mailer";
 
-
 // Config Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
@@ -21,7 +20,7 @@ export async function POST(req: Request) {
     if (!file || !orderId) {
       return NextResponse.json(
         { error: "Archivo y orderId requeridos" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -30,13 +29,13 @@ export async function POST(req: Request) {
       `SELECT id, payment_method, payment_status, payment_receipt_url
        FROM orders
        WHERE id = $1`,
-      [orderId]
+      [orderId],
     );
 
     if (orderResult.rows.length === 0) {
       return NextResponse.json(
         { error: "Orden no encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -45,21 +44,18 @@ export async function POST(req: Request) {
     if (order.payment_method !== "transfer") {
       return NextResponse.json(
         { error: "Solo transferencia puede subir comprobante" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (order.payment_status === "approved") {
-      return NextResponse.json(
-        { error: "Orden ya aprobada" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Orden ya aprobada" }, { status: 400 });
     }
 
     if (order.payment_receipt_url) {
       return NextResponse.json(
         { error: "Comprobante ya subido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -79,34 +75,30 @@ export async function POST(req: Request) {
           (error, result) => {
             if (error) reject(error);
             else resolve(result);
-          }
+          },
         )
         .end(buffer);
     });
 
     const imageUrl = uploadResult.secure_url;
 
-  await query(
-  `UPDATE orders
+    await query(
+      `UPDATE orders
    SET payment_receipt_url = $1,
        payment_status = 'receipt_uploaded',
-       expires_at = GREATEST(expires_at, NOW()) + INTERVAL '${EXTRA_TIME_HOURS} hours',
-       updated_at = NOW()
+       expires_at = GREATEST(expires_at,NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') + INTERVAL '${EXTRA_TIME_HOURS} hours',
+       updated_at = NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires',
    WHERE id = $2`,
-  [imageUrl, orderId]
-);
+      [imageUrl, orderId],
+    );
     await sendReceiptUploadedEmail(orderId, imageUrl);
 
     return NextResponse.json({
       message: "Comprobante subido",
       url: imageUrl,
     });
-
   } catch (error) {
     console.error("Error upload receipt:", error);
-    return NextResponse.json(
-      { error: "Error interno" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

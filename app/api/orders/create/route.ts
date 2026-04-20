@@ -125,13 +125,18 @@ export async function POST(req: Request) {
     let total = productsTotal + finalShipping;
 
     const orderNumber = `ORD-${randomUUID().slice(0, 8).toUpperCase()}`;
+    const nowAR = new Date(
+      new Date().toLocaleString("en-US", {
+        timeZone: "America/Argentina/Buenos_Aires",
+      }),
+    );
 
-    let expiresAt = new Date(Date.now() + 15 * 60 * 1000); // MP = 15 min
+    let expiresAt = new Date(nowAR.getTime() + 15 * 60 * 1000);
 
     // TRANSFERENCIA
     if (payment_method === "transfer") {
       total = Math.round(total * 0.85);
-      expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+      expiresAt = new Date(nowAR.getTime() + 2 * 60 * 60 * 1000);
     }
 
     // EFECTIVO SOLO RETIRO LOCAL
@@ -144,7 +149,7 @@ export async function POST(req: Request) {
         );
       }
 
-      expiresAt = new Date(Date.now() + 16 * 60 * 60 * 1000);
+      expiresAt = new Date(nowAR.getTime() + 16 * 60 * 60 * 1000);
     }
 
     // 6️⃣ Crear orden
@@ -161,13 +166,17 @@ export async function POST(req: Request) {
         order_status,
         delivery_type,
         shipping_cost,
-        expires_at
+        expires_at,
+        created_at,
+    updated_at
       )
       VALUES (
         $1, $2, $3, 'ARS', $4,
         'pending',
         'pending_payment',
-        $5, $6, $7
+        $5, $6, $7,
+    NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires',
+    NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires'
       )
       RETURNING id
       `,

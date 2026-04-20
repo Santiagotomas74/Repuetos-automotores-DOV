@@ -7,7 +7,9 @@ export function proxy(req: NextRequest) {
   const refreshToken = req.cookies.get("refreshTokenDOV")?.value;
   const { pathname } = req.nextUrl;
 
-  // evitar login/register si ya está logueado
+  // =====================================
+  // Evitar login/register si ya logueado
+  // =====================================
   if (
     accessToken &&
     (pathname.startsWith("/login") || pathname.startsWith("/register"))
@@ -15,60 +17,62 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // proteger rutas privadas
+  // =====================================
+  // Proteger rutas privadas
+  // =====================================
   if (pathname.startsWith("/user") || pathname.startsWith("/admin")) {
-
     if (!accessToken) {
-      console.log("No access token, redirigiendo a login...");
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as any;
 
+      // ==========================
+      // Validación de admins
+      // ==========================
       const allowedAdmins = [
-  "santiago_lucas1@hotmail.com",
-  "augustoda0202@gmail.com",
-];
+        "santiago_lucas1@hotmail.com",
+        "augustoda0202@gmail.com",
+      ];
 
-if (
-  pathname.startsWith("/admin") &&
-  !(
-    decoded.role === "admin" &&
-    allowedAdmins.includes(decoded.email)
-  )
-) {
-  return NextResponse.redirect(new URL("/", req.url));
-}
+      if (
+        pathname.startsWith("/admin") &&
+        !(decoded.role === "admin" && allowedAdmins.includes(decoded.email))
+      ) {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
 
+      return NextResponse.next();
     } catch (error: any) {
-
-      // access token expirado
+      // ==================================
+      // Si venció token -> usar refresh
+      // ==================================
       if (error.name === "TokenExpiredError") {
-
         if (!refreshToken) {
           return NextResponse.redirect(new URL("/login", req.url));
         }
 
         try {
-
           const decodedRefresh = jwt.verify(
             refreshToken,
-            process.env.JWT_REFRESH_SECRET!
+            process.env.JWT_REFRESH_SECRET!,
           ) as any;
 
           const newAccessToken = jwt.sign(
             {
               id: decodedRefresh.id,
               role: decodedRefresh.role,
+              email: decodedRefresh.email, // importante
             },
             process.env.JWT_SECRET!,
-            { expiresIn: "15m" }
+            { expiresIn: "15m" },
           );
 
           const response = NextResponse.next();
 
-          response.cookies.set("tokenTtech", newAccessToken, {
+          // ⚠️ TENÍAS tokenTtech -> error
+          response.cookies.set("tokenTDOV", newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
@@ -77,7 +81,6 @@ if (
           });
 
           return response;
-
         } catch {
           return NextResponse.redirect(new URL("/login", req.url));
         }
@@ -91,10 +94,5 @@ if (
 }
 
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/user/:path*",
-    "/login",
-    "/register",
-  ],
+  matcher: ["/admin/:path*", "/user/:path*", "/login", "/register"],
 };

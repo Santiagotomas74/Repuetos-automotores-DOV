@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Mail, Lock, ArrowRight, Smartphone, Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Smartphone,
+  Loader2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
@@ -13,115 +21,115 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setLoading(false);
+      if (!res.ok) {
+        setLoading(false);
 
-      await Swal.fire({
+        await Swal.fire({
+          icon: "error",
+          title: "Credenciales incorrectas",
+          text: "El email o la contraseña no son válidos.",
+          confirmButtonColor: "#2563eb",
+          confirmButtonText: "Intentar nuevamente",
+        });
+
+        return;
+      }
+
+      if (
+        (data.role === "admin" && email === "santiago_lucas1@hotmail.com") ||
+        email === "augustoda0202@gmail.com"
+      ) {
+        localStorage.setItem(process.env.NEXT_PUBLIC_ADMIN_KEY!, "true");
+        Swal.fire({
+          icon: "success",
+          title: "Bienvenido administrador",
+          text: "Accediendo al panel de administración.",
+          confirmButtonText: "Ir al panel",
+          confirmButtonColor: "#2563eb",
+        }).then(() => {
+          window.location.href = "/admin";
+        });
+      } else {
+        Swal.fire({
+          icon: "success",
+          title: "Inicio de sesión exitoso",
+          text: "Bienvenido nuevamente.",
+          confirmButtonText: "Ir a la tienda",
+          confirmButtonColor: "#2563eb",
+        }).then(() => {
+          window.location.href = "/";
+        });
+      }
+    } catch (err) {
+      console.error(err);
+
+      Swal.fire({
         icon: "error",
-        title: "Credenciales incorrectas",
-        text:  "El email o la contraseña no son válidos.",
-        confirmButtonColor: "#2563eb",
-        confirmButtonText: "Intentar nuevamente",
+        title: "Error del servidor",
+        text: "No pudimos iniciar sesión. Intenta nuevamente.",
+        confirmButtonColor: "#ef4444",
       });
-
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    if (data.role === "admin" && email === "santiago_lucas1@hotmail.com" ||  email === "augustoda0202@gmail.com") {
-      Swal.fire({
-        icon: "success",
-        title: "Bienvenido administrador",
-        text: "Accediendo al panel de administración.",
-        confirmButtonText: "Ir al panel",
-        confirmButtonColor: "#2563eb",
-      }).then(() => {
-        window.location.href = "/admin";
-      });
-
-    } else {
-      Swal.fire({
-        icon: "success",
-        title: "Inicio de sesión exitoso",
-        text: "Bienvenido nuevamente.",
-        confirmButtonText: "Ir a la tienda",
-        confirmButtonColor: "#2563eb",
-      }).then(() => {
-        window.location.href = "/";
-      });
-    }
-
-  } catch (err) {
-    console.error(err);
-
-    Swal.fire({
-      icon: "error",
-      title: "Error del servidor",
-      text: "No pudimos iniciar sesión. Intenta nuevamente.",
-      confirmButtonColor: "#ef4444",
-    });
-
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden tracking-tight">
-      
       <div className="relative w-full md:w-1/2 h-[40vh] md:h-screen flex flex-col justify-center p-8 md:p-20 text-white overflow-hidden">
-      
-         <div 
-  className="absolute inset-0 bg-cover bg-center  animate-world" 
-  style={{ 
-    backgroundImage: "url('/frente.png')", // Cambia por tu imagen
-      
-  }}
-/>
-        
+        <div
+          className="absolute inset-0 bg-cover bg-center  animate-world"
+          style={{
+            backgroundImage: "url('/frente.png')", // Cambia por tu imagen
+          }}
+        />
+
         <div className="relative z-10 space-y-6">
           <div className="flex items-center gap-3">
             {/* <div className="p-3 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"> // si pinta lo usamos !!
               <Smartphone size={32} className="text-white" />
             </div> */}
-            
           </div>
-          
-          <div className="space-y-2">
-            
-         
-         
-          </div>
+
+          <div className="space-y-2"></div>
         </div>
       </div>
 
-   
       <div className="w-full md:w-1/2 min-h-[60vh] md:h-screen bg-white flex flex-col justify-center items-center p-8 md:p-24 relative">
-        
         <div className="w-full max-w-md space-y-12">
-          
           <div className="text-center md:text-left">
-            <h3 className="text-4xl font-black text-gray-900 mb-2 italic uppercase">SIGN IN</h3>  {/* si le dejo ingresar queda re para el culo  */}
-            <p className="text-gray-400 font-medium">Ingresa tus credenciales para continuar</p>
+            <h3 className="text-4xl font-black text-gray-900 mb-2 italic uppercase">
+              SIGN IN
+            </h3>{" "}
+            {/* si le dejo ingresar queda re para el culo  */}
+            <p className="text-gray-400 font-medium">
+              Ingresa tus credenciales para continuar
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                Email
+              </label>
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors" size={20} />
+                <Mail
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors"
+                  size={20}
+                />
                 <input
                   type="email"
                   placeholder="usuario@premium.com"
@@ -133,37 +141,36 @@ export default function Login() {
               </div>
             </div>
 
-        <div className="space-y-2">
-  <div className="flex justify-between items-center px-1">
-    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-      Password
-    </label>
-  </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  Password
+                </label>
+              </div>
 
-  <div className="relative group">
-    <Lock
-      className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors"
-      size={20}
-    />
+              <div className="relative group">
+                <Lock
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors"
+                  size={20}
+                />
 
-    <input
-      type={showPassword ? "text" : "password"}
-      placeholder="••••••••"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      className="w-full pl-14 pr-14 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:bg-white focus:ring-4 focus:ring-purple-50 outline-none transition-all text-gray-700 font-medium"
-      required
-    />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-14 pr-14 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] focus:bg-white focus:ring-4 focus:ring-purple-50 outline-none transition-all text-gray-700 font-medium"
+                  required
+                />
 
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
-    >
-      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-    </button>
-  </div>
-
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button
@@ -176,7 +183,10 @@ export default function Login() {
               ) : (
                 <>
                   INGRESAR
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight
+                    size={20}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </>
               )}
             </button>
@@ -185,7 +195,10 @@ export default function Login() {
           <div className="text-center pt-4">
             <p className="text-gray-400 text-sm font-medium">
               ¿No tenes cuenta? <br />
-              <Link href="/register" className="text-black font-black hover:text-blue-600 transition-colors border-b-2 border-black/10 hover:border-blue-600">
+              <Link
+                href="/register"
+                className="text-black font-black hover:text-blue-600 transition-colors border-b-2 border-black/10 hover:border-blue-600"
+              >
                 CREA UNA CUENTA AHORA
               </Link>
             </p>
