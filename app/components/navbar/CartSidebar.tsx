@@ -2,10 +2,9 @@
 
 import { X, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { ShoppingCart,Store, Truck, ArrowLeft } from "lucide-react";
-
+import { ShoppingCart, Store, Truck, ArrowLeft } from "lucide-react";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -25,26 +24,32 @@ interface CartItem {
   stock: number;
 }
 
-export default function CartSidebar({ isOpen, onClose, count }: CartSidebarProps) {
+export default function CartSidebar({
+  isOpen,
+  onClose,
+  count,
+}: CartSidebarProps) {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-const [checkoutStep, setCheckoutStep] = useState<
-  "delivery" | "address" | "payment" | "transferCard" | null
->(null);
+  const [checkoutStep, setCheckoutStep] = useState<
+    "delivery" | "address" | "payment" | "transferCard" | null
+  >(null);
 
-  const [deliveryType, setDeliveryType] = useState<"pickup" | "shipping" | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<"transfer" | "mercadopago" | null>(null);
+  const [deliveryType, setDeliveryType] = useState<
+    "pickup" | "shipping" | null
+  >(null);
+  const [selectedPayment, setSelectedPayment] = useState<
+    "transfer" | "mercadopago" | "cash" | null
+  >(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const shippingCost = 3500;
-  let discountedTotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  ) * 0.85; // 15% de descuento por transferencia
-   discountedTotal =
+  let discountedTotal =
+    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.85; // 15% de descuento por transferencia
+  discountedTotal =
     deliveryType === "shipping"
       ? discountedTotal + shippingCost
       : discountedTotal; // agregar costo de envío si corresponde
@@ -61,14 +66,13 @@ const [checkoutStep, setCheckoutStep] = useState<
     additional_info: "",
   });
 
+  console.log(cartItems);
 
-console.log(cartItems);
-
-useEffect(() => {
-  if (!isOpen) {
-    setCheckoutStep(null);
-  }
-}, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) {
+      setCheckoutStep(null);
+    }
+  }, [isOpen]);
 
   const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
@@ -76,10 +80,221 @@ useEffect(() => {
     if (parts.length === 2) return parts.pop()?.split(";").shift();
     return null;
   };
-useEffect(() => {
-  if (!isOpen) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const fetchCart = async () => {
+    const fetchCart = async () => {
+      try {
+        setLoading(true);
+
+        // 🔐 1️⃣ verificar sesión
+        let sessionRes = await fetch("/api/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!sessionRes.ok) {
+          const data = await sessionRes.json().catch(() => null);
+
+          if (sessionRes.status === 401 && data?.error === "TokenExpired") {
+            // 🔄 refrescar token
+            const refreshRes = await fetch("/api/refresh", {
+              method: "POST",
+              credentials: "include",
+            });
+
+            if (!refreshRes.ok) {
+              Swal.fire({
+                text: "Debes iniciar sesión",
+                icon: "info",
+                confirmButtonText: "Ok",
+              });
+              return;
+            }
+
+            // 🔁 reintentar
+            sessionRes = await fetch("/api/me", {
+              method: "GET",
+              credentials: "include",
+            });
+          } else {
+            Swal.fire({
+              text: "Debes iniciar sesión",
+              icon: "info",
+              confirmButtonText: "Ok",
+            });
+            return;
+          }
+        }
+
+        const sessionData = await sessionRes.json();
+
+        // 🛒 2️⃣ obtener carrito
+        const res = await fetch("/api/cart/get", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: sessionData.user.email || getCookie("emailDOV"),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) setCartItems(data.items);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, [isOpen]);
+
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
+
+  const total =
+    deliveryType === "shipping" ? subtotal + shippingCost : subtotal;
+  const validateAddress = () => {
+    if (
+      !address.full_name ||
+      !address.street ||
+      !address.street_number ||
+      !address.city ||
+      !address.province ||
+      !address.postal_code
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Completá todos los campos obligatorios para continuar",
+        confirmButtonText: "Ok",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  //actualizar cantidad en carrito
+  const updateQuantity = async (productId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+
+    const previousCart = [...cartItems];
+
+    setUpdatingId(productId);
+
+    // Optimistic UI
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.product_id === productId
+          ? { ...item, quantity: newQuantity }
+          : item,
+      ),
+    );
+
+    try {
+      const res = await fetch("/api/cart/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: newQuantity,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error);
+      }
+      router.refresh(); // Refrescar para actualizar el contador del carrito
+    } catch (error: any) {
+      setCartItems(previousCart); // rollback
+      alert(error.message);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const removeItem = async (product_id: string) => {
+    try {
+      // 🔐 1️⃣ verificar sesión
+      let sessionRes = await fetch("/api/me", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!sessionRes.ok) {
+        const data = await sessionRes.json().catch(() => null);
+
+        if (sessionRes.status === 401 && data?.error === "TokenExpired") {
+          // 🔄 refrescar token
+          const refreshRes = await fetch("/api/refresh", {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (!refreshRes.ok) {
+            Swal.fire({
+              text: "Debes iniciar sesión",
+              icon: "info",
+              confirmButtonText: "Ok",
+            });
+            return;
+          }
+
+          // 🔁 reintentar sesión
+          sessionRes = await fetch("/api/me", {
+            method: "GET",
+            credentials: "include",
+          });
+        } else {
+          Swal.fire({
+            text: "Debes iniciar sesión",
+            icon: "info",
+            confirmButtonText: "Ok",
+          });
+          return;
+        }
+      }
+
+      const sessionData = await sessionRes.json();
+
+      // 🛒 eliminar item
+      const res = await fetch("/api/cart/remove", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: sessionData.user.email || getCookie("emailDOV"),
+          product_id,
+        }),
+      });
+
+      if (res.ok) {
+        setCartItems((prev) =>
+          prev.filter((item) => item.product_id !== product_id),
+        );
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    }
+  };
+
+  const handleCheckout = async (
+    paymentMethod: "transfer" | "mercadopago" | "cash",
+  ) => {
+    if (loading) return;
+
+    if (deliveryType === "shipping" && !validateAddress()) return;
+
     try {
       setLoading(true);
 
@@ -108,7 +323,7 @@ useEffect(() => {
             return;
           }
 
-          // 🔁 reintentar
+          // 🔁 reintentar sesión
           sessionRes = await fetch("/api/me", {
             method: "GET",
             credentials: "include",
@@ -125,254 +340,57 @@ useEffect(() => {
 
       const sessionData = await sessionRes.json();
 
-      // 🛒 2️⃣ obtener carrito
-      const res = await fetch("/api/cart/get", {
+      // 🧾 crear orden
+      const res = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           email: sessionData.user.email || getCookie("emailDOV"),
+          payment_method: paymentMethod,
+          delivery_type: deliveryType,
+          shipping_cost: deliveryType === "shipping" ? shippingCost : 0,
+          address: deliveryType === "shipping" ? address : null,
         }),
       });
 
       const data = await res.json();
 
-      if (res.ok) setCartItems(data.items);
+      if (!res.ok) {
+        throw new Error(data.error || "Error desconocido");
+      }
 
+      if (paymentMethod === "mercadopago") {
+        window.location.href = data.init_point;
+      }
+
+      if (paymentMethod === "transfer") {
+        setOrderId(data.order_id);
+        setCheckoutStep("transferCard");
+        return;
+      }
+      if (paymentMethod === "cash") {
+        Swal.fire({
+          icon: "success",
+          title: "Orden generada",
+          html: `
+      Pagás en efectivo al retirar.<br/><br/>
+      Tenés <b>16 horas</b> para pasar por el local.<br/>
+      Si no, la reserva se cancela automáticamente.
+    `,
+          confirmButtonText: "Ir a mis compras",
+        }).then(() => {
+          window.location.href = "/user/dashboard";
+        });
+
+        return;
+      }
+    } catch (error: any) {
+      alert(error.message);
     } finally {
       setLoading(false);
     }
   };
-
-  fetchCart();
-}, [isOpen]);
-
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
-  const total =
-    deliveryType === "shipping"
-      ? subtotal + shippingCost
-      : subtotal;
-const validateAddress = () => {
-    if (!address.full_name || !address.street || !address.street_number || !address.city || !address.province || !address.postal_code) {
-      Swal.fire({
-        icon: "warning",
-        title: "Faltan datos",
-        text: "Completá todos los campos obligatorios para continuar",
-        confirmButtonText: "Ok",
-        confirmButtonColor: "#2563eb"
-      });
-      return false;
-    }
-    return true;
-  };
-
-  
-//actualizar cantidad en carrito
-const updateQuantity = async (productId: string, newQuantity: number) => {
-  if (newQuantity < 1) return;
-
-  const previousCart = [...cartItems];
-
-  setUpdatingId(productId);
-
-  // Optimistic UI
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item.product_id === productId
-        ? { ...item, quantity: newQuantity }
-        : item
-    )
-  );
-
-  try {
-    const res = await fetch("/api/cart/update", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        product_id: productId,
-        quantity: newQuantity,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error);
-    }
-    router.refresh(); // Refrescar para actualizar el contador del carrito
-
-  } catch (error: any) {
-    setCartItems(previousCart); // rollback
-    alert(error.message);
-  } finally {
-    setUpdatingId(null);
-  }
-};
-
- const removeItem = async (product_id: string) => {
-  try {
-
-    // 🔐 1️⃣ verificar sesión
-    let sessionRes = await fetch("/api/me", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!sessionRes.ok) {
-      const data = await sessionRes.json().catch(() => null);
-
-      if (sessionRes.status === 401 && data?.error === "TokenExpired") {
-        // 🔄 refrescar token
-        const refreshRes = await fetch("/api/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!refreshRes.ok) {
-          Swal.fire({
-            text: "Debes iniciar sesión",
-            icon: "info",
-            confirmButtonText: "Ok",
-          });
-          return;
-        }
-
-        // 🔁 reintentar sesión
-        sessionRes = await fetch("/api/me", {
-          method: "GET",
-          credentials: "include",
-        });
-
-      } else {
-        Swal.fire({
-          text: "Debes iniciar sesión",
-          icon: "info",
-          confirmButtonText: "Ok",
-        });
-        return;
-      }
-    }
-
-    const sessionData = await sessionRes.json();
-
-    // 🛒 eliminar item
-    const res = await fetch("/api/cart/remove", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        email: sessionData.user.email || getCookie("emailDOV"),
-        product_id
-      }),
-    });
-
-    if (res.ok) {
-      setCartItems((prev) =>
-        prev.filter((item) => item.product_id !== product_id)
-      );
-    }
-
-    router.refresh();
-
-  } catch (error) {
-    console.error("Error eliminando producto:", error);
-  }
-};
-
-
-const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
-  if (loading) return;
-
-  if (deliveryType === "shipping" && !validateAddress()) return;
-
-  try {
-    setLoading(true);
-
-    // 🔐 1️⃣ verificar sesión
-    let sessionRes = await fetch("/api/me", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!sessionRes.ok) {
-      const data = await sessionRes.json().catch(() => null);
-
-      if (sessionRes.status === 401 && data?.error === "TokenExpired") {
-        // 🔄 refrescar token
-        const refreshRes = await fetch("/api/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!refreshRes.ok) {
-          Swal.fire({
-            text: "Debes iniciar sesión",
-            icon: "info",
-            confirmButtonText: "Ok",
-          });
-          return;
-        }
-
-        // 🔁 reintentar sesión
-        sessionRes = await fetch("/api/me", {
-          method: "GET",
-          credentials: "include",
-        });
-
-      } else {
-        Swal.fire({
-          text: "Debes iniciar sesión",
-          icon: "info",
-          confirmButtonText: "Ok",
-        });
-        return;
-      }
-    }
-
-    const sessionData = await sessionRes.json();
-
-    // 🧾 crear orden
-    const res = await fetch("/api/orders/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        email: sessionData.user.email || getCookie("emailDOV"),
-        payment_method: paymentMethod,
-        delivery_type: deliveryType,
-        shipping_cost: deliveryType === "shipping" ? shippingCost : 0,
-        address: deliveryType === "shipping" ? address : null,
-      }),
-    });
-
-    const data = await res.json(); 
-
-    if (!res.ok) {
-      throw new Error(data.error || "Error desconocido");
-    }
-
-    if (paymentMethod === "mercadopago") {
-      window.location.href = data.init_point;
-    }
-
-    if (paymentMethod === "transfer") {
-      setOrderId(data.order_id);
-      setCheckoutStep("transferCard");
-      return;
-    }
-
-  } catch (error: any) {
-    alert(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
 
   return (
     <>
@@ -393,136 +411,131 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
         <div className="flex items-center justify-between p-6 border-b bg-white">
           <div className="flex items-center gap-2 text-gray-700">
             <ShoppingBag size={20} />
-            <h2 className="text-xl font-semibold">Tu Carrito</h2> 
+            <h2 className="text-xl font-semibold">Tu Carrito</h2>
             <span className="bg-blue-500 text-white text-xl px-2 py-1 rounded-md ml-2">
               {count}
             </span>
           </div>
-         <button
-  onClick={() => {
-    setCheckoutStep(null);
-    onClose();
-  }}
-  className="text-gray-400 hover:text-gray-600 transition"
->
-  <X  size={22} />
-</button>
+          <button
+            onClick={() => {
+              setCheckoutStep(null);
+              onClose();
+            }}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            <X size={22} />
+          </button>
         </div>
 
         <div className="p-6 flex flex-col h-[85vh] overflow-y-auto">
-
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 gap-4">
               <p>Tu carrito está vacío</p>
             </div>
           ) : (
             <>
-              
-   <div className="flex-1 overflow-y-auto space-y-4">
-             {cartItems.map((item) => (
-  <div
-    key={item.product_id}
-    className="bg-gray-100 rounded-2xl p-4 flex gap-4 items-start"
-  >
-    {/* Imagen */}
-    <img
-      src={item.image1}
-      alt={item.name}
-      className="w-30 h-30 rounded-xl object-cover"
-    />
+              <div className="flex-1 overflow-y-auto space-y-4">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.product_id}
+                    className="bg-gray-100 rounded-2xl p-4 flex gap-4 items-start"
+                  >
+                    {/* Imagen */}
+                    <img
+                      src={item.image1}
+                      alt={item.name}
+                      className="w-30 h-30 rounded-xl object-cover"
+                    />
 
-    {/* Info */}
-    <div className="flex-1">
-      <div className="flex justify-between">
-        <div>
-          <p className="font-semibold text-base text-gray-800">
-            {item.name} 
-          </p>
-          <p className="text-sm text-gray-500">
-            {/* si tienes variante puedes ponerla aquí */}
-            {item.oem_number} {item.brand} {item.compatible_models.join(", ")}
-          </p>
-        </div>
+                    {/* Info */}
+                    <div className="flex-1">
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-semibold text-base text-gray-800">
+                            {item.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {/* si tienes variante puedes ponerla aquí */}
+                            {item.oem_number} {item.brand}{" "}
+                            {item.compatible_models.join(", ")}
+                          </p>
+                        </div>
 
-        <button
-  onClick={() => removeItem(item.product_id)}
-  className="text-gray-400 hover:text-red-600 transition"
->
-  <X size={16} />
-</button>
+                        <button
+                          onClick={() => removeItem(item.product_id)}
+                          className="text-gray-400 hover:text-red-600 transition"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
 
-      </div>
+                      {/* Controles cantidad */}
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center bg-white rounded-xl  gap-3 shadow-sm text-gray-800">
+                          <button
+                            className="text-lg  bg-red-400 text-white rounded-lg px-2 py-1 hover:bg-red-500 transition"
+                            onClick={() =>
+                              updateQuantity(item.product_id, item.quantity - 1)
+                            }
+                            disabled={
+                              item.quantity <= 1 ||
+                              updatingId === item.product_id
+                            }
+                          >
+                            −
+                          </button>
 
-      {/* Controles cantidad */}
-     <div className="flex items-center justify-between mt-3">
-  <div className="flex items-center bg-white rounded-xl  gap-3 shadow-sm text-gray-800">
+                          {updatingId === item.product_id ? (
+                            <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin "></div>
+                          ) : (
+                            <span>{item.quantity}</span>
+                          )}
 
-    <button
-      className="text-lg  bg-red-400 text-white rounded-lg px-2 py-1 hover:bg-red-500 transition"
-      onClick={() =>
-        updateQuantity(item.product_id, item.quantity - 1)
-      }
-      disabled={item.quantity <= 1 || updatingId === item.product_id}
-    >
-      −
-    </button>
+                          <button
+                            className="text-lg bg-green-400 text-white rounded-lg px-2 py-1 hover:bg-green-500 transition"
+                            onClick={() =>
+                              updateQuantity(item.product_id, item.quantity + 1)
+                            }
+                            disabled={updatingId === item.product_id}
+                          >
+                            +
+                          </button>
+                        </div>
 
-    {updatingId === item.product_id ? (
-      <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin "></div>
-    ) : (
-      <span>{item.quantity}</span>
-    )}
-
-    <button
-      className="text-lg bg-green-400 text-white rounded-lg px-2 py-1 hover:bg-green-500 transition"
-      onClick={() =>
-        updateQuantity(item.product_id, item.quantity + 1)
-      }
-      disabled={updatingId === item.product_id}
-    >
-      +
-    </button>
-
-  </div>
-
-  <p className="font-semibold text-base text-gray-800">
-    ${(item.price * item.quantity).toLocaleString()}
-  </p>
-</div>
-    </div>
-  </div>
-))}
-
+                        <p className="font-semibold text-base text-gray-800">
+                          ${(item.price * item.quantity).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="border-t pt-4 mt-4 space-y-4">
-
-              
-
                 {/* Flujo checkout */}
                 {!checkoutStep && (
                   <div>
-                    
-                  {/* Subtotal */}
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toLocaleString()}</span>
-                </div>
-                  <button
-  onClick={() => setCheckoutStep("delivery")}
-  className="w-full bg-blue-600 text-white py-3.5 rounded-2xl mt-2 flex items-center justify-center gap-2 font-semibold tracking-wide shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-[0.98] transition-all duration-200"
->
-  Continuar con la compra
-</button>
-              </div> )}
+                    {/* Subtotal */}
+                    <div className="flex justify-between text-gray-700">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toLocaleString()}</span>
+                    </div>
+                    <button
+                      onClick={() => setCheckoutStep("delivery")}
+                      className="w-full bg-blue-600 text-white py-3.5 rounded-2xl mt-2 flex items-center justify-center gap-2 font-semibold tracking-wide shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-[0.98] transition-all duration-200"
+                    >
+                      Continuar con la compra
+                    </button>
+                  </div>
+                )}
 
                 {checkoutStep === "delivery" && (
                   <div className="space-y-3 fade-step mb-0">
                     <button
-                   onClick={() => setCheckoutStep(null)}
-                   className="text-sm text-gray-700"
+                      onClick={() => setCheckoutStep(null)}
+                      className="text-sm text-gray-700"
                     >
-                   ← Volver
-                   </button>
+                      ← Volver
+                    </button>
                     <button
                       onClick={() => {
                         setDeliveryType("pickup");
@@ -530,17 +543,23 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
                       }}
                       className="group flex items-center justify-between p-5 bg-white border-2 border-gray-100 rounded-3xl transition-all text-left w-full"
                     >
-                     <div className="flex items-center gap-4">
-                <div className="p-3 bg-gray-900 rounded-2xl   transition-colors">
-                  <Store size={24} className="text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">Retiro en local</p>
-                  <p className="text-xs text-gray-500">Estamos en CABA</p>
-                </div>
-              </div>
-              <span className="font-black text-green-600 text-sm">Gratis</span>
-            </button>
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gray-900 rounded-2xl   transition-colors">
+                          <Store size={24} className="text-white" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            Retiro en local
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Estamos en CABA
+                          </p>
+                        </div>
+                      </div>
+                      <span className="font-black text-green-600 text-sm">
+                        Gratis
+                      </span>
+                    </button>
 
                     <button
                       onClick={() => {
@@ -549,115 +568,140 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
                       }}
                       className="group flex items-center justify-between p-5 bg-white border-2 border-gray-100 rounded-3xl  transition-all text-left w-full"
                     >
-                     <div className="flex items-center gap-4">
-                <div className="p-3 bg-gray-900 rounded-2xl  transition-colors">
-                  <Truck size={24}  className="text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">Envío a domicilio</p>
-                  <p className="text-xs text-gray-500">Llega en 24-48hs</p>
-                </div>
-              </div>
-              <span className="font-black text-gray-900 text-sm">+${shippingCost}</span>
-            </button>
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gray-900 rounded-2xl  transition-colors">
+                          <Truck size={24} className="text-white" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            Envío a domicilio
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Llega en 24-48hs
+                          </p>
+                        </div>
+                      </div>
+                      <span className="font-black text-gray-900 text-sm">
+                        +${shippingCost}
+                      </span>
+                    </button>
                   </div>
                 )}
-  {checkoutStep === "address" && (
-  <div className="space-y-5 bg-white p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm w-full max-w-2xl mx-auto mb-5">
-    
-    <button
-      onClick={() => setCheckoutStep("delivery")}
-      className="text-sm text-gray-600 hover:text-black flex items-center gap-1"
-    >
-      ← Volver
-    </button>
+                {checkoutStep === "address" && (
+                  <div className="space-y-5 bg-white p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm w-full max-w-2xl mx-auto mb-5">
+                    <button
+                      onClick={() => setCheckoutStep("delivery")}
+                      className="text-sm text-gray-600 hover:text-black flex items-center gap-1"
+                    >
+                      ← Volver
+                    </button>
 
-    {/* Header */}
-    <div>
-      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
-        Dirección de entrega
-      </h3>
-      <p className="text-sm text-gray-500 mt-1">
-        Completá los datos obligatorios (*) para recibir tu pedido.
-      </p>
-    </div>
+                    {/* Header */}
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                        Dirección de entrega
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Completá los datos obligatorios (*) para recibir tu
+                        pedido.
+                      </p>
+                    </div>
 
-    {/* Formulario */}
-    <div className="space-y-4 text-black">
-      <input
-        placeholder="Nombre completo *"
-        value={address.full_name}
-        onChange={(e) => setAddress({ ...address, full_name: e.target.value })}
-        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-      />
+                    {/* Formulario */}
+                    <div className="space-y-4 text-black">
+                      <input
+                        placeholder="Nombre completo *"
+                        value={address.full_name}
+                        onChange={(e) =>
+                          setAddress({ ...address, full_name: e.target.value })
+                        }
+                        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                      />
 
-      <input
-        placeholder="Teléfono *"
-        value={address.phone}
-        onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-      />
+                      <input
+                        placeholder="Teléfono *"
+                        value={address.phone}
+                        onChange={(e) =>
+                          setAddress({ ...address, phone: e.target.value })
+                        }
+                        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <input
-          placeholder="Calle *"
-          value={address.street}
-          onChange={(e) => setAddress({ ...address, street: e.target.value })}
-          className="sm:col-span-2 bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-        />
-        <input
-          placeholder="N° *"
-          value={address.street_number}
-          onChange={(e) => setAddress({ ...address, street_number: e.target.value })}
-          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-        />
-      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input
+                          placeholder="Calle *"
+                          value={address.street}
+                          onChange={(e) =>
+                            setAddress({ ...address, street: e.target.value })
+                          }
+                          className="sm:col-span-2 bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        />
+                        <input
+                          placeholder="N° *"
+                          value={address.street_number}
+                          onChange={(e) =>
+                            setAddress({
+                              ...address,
+                              street_number: e.target.value,
+                            })
+                          }
+                          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        />
+                      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input
-          placeholder="Ciudad *"
-          value={address.city}
-          onChange={(e) => setAddress({ ...address, city: e.target.value })}
-          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-        />
-        <input
-          placeholder="Provincia *"
-          value={address.province}
-          onChange={(e) => setAddress({ ...address, province: e.target.value })}
-          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-        />
-      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input
+                          placeholder="Ciudad *"
+                          value={address.city}
+                          onChange={(e) =>
+                            setAddress({ ...address, city: e.target.value })
+                          }
+                          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        />
+                        <input
+                          placeholder="Provincia *"
+                          value={address.province}
+                          onChange={(e) =>
+                            setAddress({ ...address, province: e.target.value })
+                          }
+                          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        />
+                      </div>
 
-      <input
-        placeholder="Código Postal *"
-        value={address.postal_code}
-        onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
-        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-      />
-    </div>
+                      <input
+                        placeholder="Código Postal *"
+                        value={address.postal_code}
+                        onChange={(e) =>
+                          setAddress({
+                            ...address,
+                            postal_code: e.target.value,
+                          })
+                        }
+                        className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                      />
+                    </div>
 
-    {/* Botón con validación reforzada */}
-    <button
-      onClick={() => {
-        if (validateAddress()) {
-          setCheckoutStep("payment");
-        }
-      }}
-      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-all"
-    >
-      Continuar Compra
-    </button>
-  </div>
-)}
+                    {/* Botón con validación reforzada */}
+                    <button
+                      onClick={() => {
+                        if (validateAddress()) {
+                          setCheckoutStep("payment");
+                        }
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-all"
+                    >
+                      Continuar Compra
+                    </button>
+                  </div>
+                )}
                 {checkoutStep === "payment" && (
                   <div className="space-y-3 fade-step">
                     <button
-             onClick={() => setCheckoutStep("delivery")}
-             className="text-sm text-gray-700"
-          >
-            ← Volver
-    
-         </button>
+                      onClick={() => setCheckoutStep("delivery")}
+                      className="text-sm text-gray-700"
+                    >
+                      ← Volver
+                    </button>
                     {/* Total dinámico */}
                     <div className="bg-neutral-100 p-3 rounded-xl text-sm">
                       <div className="flex justify-between text-gray-700">
@@ -667,122 +711,165 @@ const handleCheckout = async (paymentMethod: "transfer" | "mercadopago") => {
                         </span>
                       </div>
                     </div>
-{/* MERCADO PAGO */}
-<div className="space-y-0">
-  <button
-    disabled={loading}
-    onClick={() => handleCheckout("mercadopago")}
-    className="w-full bg-white hover:bg-gray-50 active:scale-[0.99] transition-all border border-gray-200 rounded-2xl p-4 shadow-sm disabled:opacity-50"
-  >
-    <div className="flex items-center justify-between">
-      
-      <div className="flex items-center gap-3">
-        <img
-          src="/image/Mercadopago.png"
-          alt="Mercado Pago"
-          className="h-7 w-auto"
-        />
-        <div className="text-left">
-          <p className="font-semibold text-gray-900">Mercado Pago</p>
-          <p className="text-xs text-gray-500">Tarjetas · Cuotas</p>
-        </div>
-      </div>
+                    {/* MERCADO PAGO */}
+                    <div className="space-y-0">
+                      <button
+                        disabled={loading}
+                        onClick={() => handleCheckout("mercadopago")}
+                        className="w-full bg-white hover:bg-gray-50 active:scale-[0.99] transition-all border border-gray-200 rounded-2xl p-4 shadow-sm disabled:opacity-50"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src="/image/Mercadopago.png"
+                              alt="Mercado Pago"
+                              className="h-7 w-auto"
+                            />
+                            <div className="text-left">
+                              <p className="font-semibold text-gray-900">
+                                Mercado Pago
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Tarjetas · Cuotas
+                              </p>
+                            </div>
+                          </div>
 
-      <span className="text-lg font-bold text-gray-900">
-        ${total.toLocaleString()}
-      </span>
+                          <span className="text-lg font-bold text-gray-900">
+                            ${total.toLocaleString()}
+                          </span>
+                        </div>
+                      </button>
 
-    </div>
-  </button>
+                      <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-900 mt-2">
+                        Compra protegida · Pago 100% seguro · Aceptamos todas
+                        las tarjetas
+                      </div>
+                    </div>
 
-  <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-900 mt-2">
-    Compra protegida · Pago 100% seguro · Aceptamos todas las tarjetas
-  </div>
-</div>
+                    {/* TRANSFERENCIA */}
+                    <div className="space-y-0 mt-3">
+                      <button
+                        disabled={loading}
+                        onClick={() => handleCheckout("transfer")}
+                        className="w-full bg-white hover:bg-gray-50 active:scale-[0.99] transition-all border border-gray-200 rounded-2xl p-4 shadow-sm disabled:opacity-50"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src="/image/transferencia.png"
+                              alt="Transferencia"
+                              className="h-7 w-auto"
+                            />
+                            <div className="text-left">
+                              <p className="font-semibold text-gray-900">
+                                Transferencia bancaria
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Acreditación hasta 48 hs
+                              </p>
+                            </div>
+                          </div>
 
+                          <div className="text-right">
+                            <span className="block text-lg font-bold text-gray-900">
+                              ${discountedTotal.toLocaleString()}
+                            </span>
+                            <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-semibold">
+                              15% OFF
+                            </span>
+                          </div>
+                        </div>
+                      </button>
 
-{/* TRANSFERENCIA */}
-<div className="space-y-0 mt-3">
-  <button
-    disabled={loading}
-    onClick={() => handleCheckout("transfer")}
-    className="w-full bg-white hover:bg-gray-50 active:scale-[0.99] transition-all border border-gray-200 rounded-2xl p-4 shadow-sm disabled:opacity-50"
-  >
-    <div className="flex items-center justify-between">
+                      <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-xs text-green-900 mt-2">
+                        Ahorrás pagando por transferencia
+                      </div>
+                    </div>
+                    {/* EFECTIVO EN LOCAL */}
+                    {deliveryType === "pickup" && (
+                      <div className="space-y-0 mt-3">
+                        <button
+                          disabled={loading}
+                          onClick={() => handleCheckout("cash")}
+                          className="w-full bg-white hover:bg-gray-50 active:scale-[0.99] transition-all border border-gray-200 rounded-2xl p-4 shadow-sm disabled:opacity-50"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-7 w-7 flex items-center justify-center text-green-600 text-xl">
+                                💵
+                              </div>
 
-      <div className="flex items-center gap-3">
-        <img
-          src="/image/transferencia.png"
-          alt="Transferencia"
-          className="h-7 w-auto"
-        />
-        <div className="text-left">
-          <p className="font-semibold text-gray-900">
-            Transferencia bancaria
-          </p>
-          <p className="text-xs text-gray-500">
-            Acreditación hasta 48 hs
-          </p>
-        </div>
-      </div>
+                              <div className="text-left">
+                                <p className="font-semibold text-gray-900">
+                                  Pago en efectivo
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Pagás al retirar en el local
+                                </p>
+                              </div>
+                            </div>
 
-      <div className="text-right">
-        <span className="block text-lg font-bold text-gray-900">
-          ${discountedTotal.toLocaleString()}
-        </span>
-        <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-semibold">
-          15% OFF
-        </span>
-      </div>
+                            <span className="text-lg font-bold text-gray-900">
+                              ${total.toLocaleString()}
+                            </span>
+                          </div>
+                        </button>
 
-    </div>
-  </button>
-
-  <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-xs text-green-900 mt-2">
-    Ahorrás pagando por transferencia
-  </div>
-</div>
+                        <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-xs text-yellow-900 mt-2">
+                          Reservamos tu pedido por 16 horas hasta que pases a
+                          retirarlo.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {checkoutStep === "transferCard" && orderId && (
-    <div className="bg-white border rounded-2xl p-6 shadow-lg space-y-4 animate-fade-in">
-    
-    <h3 className="text-lg font-semibold text-black ">
-      Datos para realizar la transferencia
-    </h3>
+                  <div className="bg-white border rounded-2xl p-6 shadow-lg space-y-4 animate-fade-in">
+                    <h3 className="text-lg font-semibold text-black ">
+                      Datos para realizar la transferencia
+                    </h3>
 
-    <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2  ">
-            <p className="text-black"><strong>CBU:</strong> 0000003100000000000000</p>
-            <p className="text-black"><strong>Alias:</strong> Dov.PAGOS</p>
-            <p className="text-black"><strong>Titular:</strong> Dov S.A.</p>
-          </div>
-    
-    <p className="text-sm text-gray-900">
-      El total que deberás transferir es exactamente <strong>${discountedTotal.toLocaleString()}</strong> para que podamos identificar tu pago.
-    </p>
-    
-     <p className="text-sm text-gray-900">
-   Tiene 2 horas para subir el comprobante de la transferencia. Pasado ese tiempo, la orden se cancelará automáticamente y el stock se liberará.
-    </p>
-   <p className="text-sm text-gray-900">
-      ⏳ El pago puede demorar hasta 48 hs en acreditarse.
-    </p>
+                    <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2  ">
+                      <p className="text-black">
+                        <strong>CBU:</strong> 0000003100000000000000
+                      </p>
+                      <p className="text-black">
+                        <strong>Alias:</strong> Dov.PAGOS
+                      </p>
+                      <p className="text-black">
+                        <strong>Titular:</strong> Dov S.A.
+                      </p>
+                    </div>
 
-    <button
-      onClick={() => window.location.href = "/user/dashboard"}
-      className="w-full bg-black text-white py-3 rounded-xl"
-    >
-      Subir comprobante
-    </button>
+                    <p className="text-sm text-gray-900">
+                      El total que deberás transferir es exactamente{" "}
+                      <strong>${discountedTotal.toLocaleString()}</strong> para
+                      que podamos identificar tu pago.
+                    </p>
 
-    <p className="text-xs text-gray-400 text-center">
-      Orden #{orderId}
-    </p>
+                    <p className="text-sm text-gray-900">
+                      Tiene 2 horas para subir el comprobante de la
+                      transferencia. Pasado ese tiempo, la orden se cancelará
+                      automáticamente y el stock se liberará.
+                    </p>
+                    <p className="text-sm text-gray-900">
+                      ⏳ El pago puede demorar hasta 48 hs en acreditarse.
+                    </p>
 
-  </div>
-)}
+                    <button
+                      onClick={() => (window.location.href = "/user/dashboard")}
+                      className="w-full bg-black text-white py-3 rounded-xl"
+                    >
+                      Subir comprobante
+                    </button>
 
+                    <p className="text-xs text-gray-400 text-center">
+                      Orden #{orderId}
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}

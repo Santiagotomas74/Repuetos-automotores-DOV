@@ -15,6 +15,7 @@ export async function POST(req: Request) {
       shipping_cost = 0,
       address,
     } = await req.json();
+
     console.log("Datos recibidos en create order:", {
       email,
       payment_method,
@@ -24,10 +25,7 @@ export async function POST(req: Request) {
     });
 
     if (!email || !payment_method || !delivery_type) {
-      return NextResponse.json(
-        { error: "Datos incompletos" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
     }
 
     const decodedEmail = decodeURIComponent(email);
@@ -37,14 +35,14 @@ export async function POST(req: Request) {
     // 1️⃣ Obtener user_id
     const userResult = await client.query(
       `SELECT id FROM users WHERE email = $1`,
-      [decodedEmail]
+      [decodedEmail],
     );
 
     if (userResult.rows.length === 0) {
       await client.query("ROLLBACK");
       return NextResponse.json(
         { error: "Usuario no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -63,20 +61,17 @@ export async function POST(req: Request) {
       INNER JOIN products ON products.id = cart_items.product_id
       WHERE cart.user_id = $1
       `,
-      [userId]
+      [userId],
     );
 
     if (cartResult.rows.length === 0) {
       await client.query("ROLLBACK");
-      return NextResponse.json(
-        { error: "Carrito vacío" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
     }
 
     const cartItems = cartResult.rows;
 
-    // 3️⃣ Descontar stock de forma atómica por cada producto
+    // 3️⃣ Descontar stock
     for (const item of cartItems) {
       const stockUpdate = await client.query(
         `
@@ -86,19 +81,19 @@ export async function POST(req: Request) {
         AND stock >= $2
         RETURNING id
         `,
-        [item.product_id, item.quantity]
+        [item.product_id, item.quantity],
       );
 
       if (stockUpdate.rows.length === 0) {
         await client.query("ROLLBACK");
         return NextResponse.json(
           { error: `Stock insuficiente para ${item.name}` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
-    // 4️⃣ Validar dirección si es shipping
+    // 4️⃣ Validar dirección
     if (delivery_type === "shipping") {
       if (
         !address ||
@@ -112,42 +107,68 @@ export async function POST(req: Request) {
         await client.query("ROLLBACK");
         return NextResponse.json(
           { error: "Dirección incompleta" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
-// 5️⃣ Calcular total
-const productsTotal = cartItems.reduce(
-  (acc: number, item: any) =>
-    acc + Number(item.price) * Number(item.quantity),
-  0
-);
 
-const finalShipping =
-  delivery_type === "shipping" ? Number(shipping_cost) : 0;
+    // 5️⃣ Calcular total
+    const productsTotal = cartItems.reduce(
+      (acc: number, item: any) =>
+        acc + Number(item.price) * Number(item.quantity),
+      0,
+    );
 
-let total = productsTotal + finalShipping;
+    const finalShipping =
+      delivery_type === "shipping" ? Number(shipping_cost) : 0;
 
-const orderNumber = `ORD-${randomUUID().slice(0, 8).toUpperCase()}`;
+    let total = productsTotal + finalShipping;
 
-let expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min MercadoPago
+    const orderNumber = `ORD-${randomUUID().slice(0, 8).toUpperCase()}`;
 
-// Pago por transferencia (15% OFF)
-if (payment_method === "transfer") {
-  total = Math.round(total * 0.85); // aplicar descuento
-  expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 horas
-}
-    
-    
+    let expiresAt = new Date(Date.now() + 15 * 60 * 1000); // MP = 15 min
+
+    // TRANSFERENCIA
+    if (payment_method === "transfer") {
+      total = Math.round(total * 0.85);
+      expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    }
+
+    // EFECTIVO SOLO RETIRO LOCAL
+    if (payment_method === "cash") {
+      if (delivery_type !== "pickup") {
+        await client.query("ROLLBACK");
+        return NextResponse.json(
+          { error: "Efectivo solo disponible para retiro en local" },
+          { status: 400 },
+        );
+      }
+
+      expiresAt = new Date(Date.now() + 16 * 60 * 60 * 1000);
+    }
 
     // 6️⃣ Crear orden
     const orderInsert = await client.query(
       `
       INSERT INTO orders 
-      (order_number, user_id, total_amount, currency, payment_method,
-       payment_status, order_status, delivery_type, shipping_cost, expires_at)
-      VALUES ($1, $2, $3, 'ARS', $4,
-              'pending', 'pending_payment', $5, $6, $7)
+      (
+        order_number,
+        user_id,
+        total_amount,
+        currency,
+        payment_method,
+        payment_status,
+        order_status,
+        delivery_type,
+        shipping_cost,
+        expires_at
+      )
+      VALUES (
+        $1, $2, $3, 'ARS', $4,
+        'pending',
+        'pending_payment',
+        $5, $6, $7
+      )
       RETURNING id
       `,
       [
@@ -158,18 +179,25 @@ if (payment_method === "transfer") {
         delivery_type,
         finalShipping,
         expiresAt,
-      ]
+      ],
     );
 
     const orderId = orderInsert.rows[0].id;
 
-    // 7️⃣ Insertar order_items
+    // 7️⃣ order_items
     for (const item of cartItems) {
       await client.query(
         `
         INSERT INTO order_items
-        (order_id, product_id, product_name, unit_price, quantity, subtotal)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        (
+          order_id,
+          product_id,
+          product_name,
+          unit_price,
+          quantity,
+          subtotal
+        )
+        VALUES ($1,$2,$3,$4,$5,$6)
         `,
         [
           orderId,
@@ -178,17 +206,27 @@ if (payment_method === "transfer") {
           Number(item.price),
           Number(item.quantity),
           Number(item.price) * Number(item.quantity),
-        ]
+        ],
       );
     }
 
-    // 8️⃣ Guardar dirección
+    // 8️⃣ Dirección
     if (delivery_type === "shipping") {
       await client.query(
         `
         INSERT INTO order_addresses
-        (order_id, full_name, phone, street, street_number, apartment,
-         city, province, postal_code, additional_info)
+        (
+          order_id,
+          full_name,
+          phone,
+          street,
+          street_number,
+          apartment,
+          city,
+          province,
+          postal_code,
+          additional_info
+        )
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
         `,
         [
@@ -202,26 +240,27 @@ if (payment_method === "transfer") {
           address.province,
           address.postal_code,
           address.additional_info || null,
-        ]
+        ],
       );
     }
 
-    // 9️⃣ Limpiar carrito
+    // 9️⃣ Vaciar carrito
     const cartIdResult = await client.query(
       `SELECT id FROM cart WHERE user_id = $1`,
-      [userId]
+      [userId],
     );
 
     if (cartIdResult.rows.length > 0) {
-      await client.query(
-        `DELETE FROM cart_items WHERE cart_id = $1`,
-        [cartIdResult.rows[0].id]
-      );
+      await client.query(`DELETE FROM cart_items WHERE cart_id = $1`, [
+        cartIdResult.rows[0].id,
+      ]);
     }
 
     await client.query("COMMIT");
 
-    // 🔟 Transferencia
+    // 🔟 RESPUESTAS
+
+    // Transferencia
     if (payment_method === "transfer") {
       return NextResponse.json({
         order_id: orderId,
@@ -229,7 +268,16 @@ if (payment_method === "transfer") {
       });
     }
 
-    // 11️⃣ MercadoPago
+    // Efectivo
+    if (payment_method === "cash") {
+      return NextResponse.json({
+        order_id: orderId,
+        order_number: orderNumber,
+        message: "Orden reservada por 16 horas",
+      });
+    }
+
+    // MercadoPago
     if (payment_method === "mercadopago") {
       const preference = new Preference(mpClient);
 
@@ -277,16 +325,16 @@ if (payment_method === "transfer") {
 
     return NextResponse.json(
       { error: "Método de pago inválido" },
-      { status: 400 }
+      { status: 400 },
     );
-
   } catch (error: any) {
     await client.query("ROLLBACK");
+
     console.error("Error creando orden:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     client.release();

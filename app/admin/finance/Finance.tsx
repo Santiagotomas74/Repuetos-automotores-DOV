@@ -23,12 +23,15 @@ export default function AdminFinance() {
     }
   };
 
-  if (loading) return <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-      <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
-      <p className="text-sm font-medium animate-pulse">
-        Cargando Ingresos...
-      </p>
-    </div>;
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
+        <p className="text-sm font-medium animate-pulse">
+          Cargando Ingresos...
+        </p>
+      </div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto py-3 space-y-8 mb-15">
@@ -38,9 +41,7 @@ export default function AdminFinance() {
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow">
           <p className="text-gray-500">Total Órdenes</p>
-          <p className="text-2xl font-bold">
-            {data.summary.total_orders}
-          </p>
+          <p className="text-2xl font-bold">{data.summary.total_orders}</p>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow">
@@ -53,15 +54,10 @@ export default function AdminFinance() {
 
       {/* Historial mensual */}
       <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-4">
-          Ingresos por Mes
-        </h2>
+        <h2 className="text-xl font-semibold mb-4">Ingresos por Mes</h2>
 
         {data.monthly.map((m: any, index: number) => (
-          <div
-            key={index}
-            className="flex justify-between border-b py-2"
-          >
+          <div key={index} className="flex justify-between border-b py-2">
             <span>{m.month}</span>
             <span>
               ${Number(m.revenue).toLocaleString()} ({m.orders} órdenes)
@@ -77,18 +73,16 @@ export default function AdminFinance() {
         </h2>
 
         {data.orders.map((order: any) => (
-          <div
-            key={order.id}
-            className="flex justify-between border-b py-3"
-          >
+          <div key={order.id} className="flex justify-between border-b py-3">
             <div>
-              <p className="font-semibold">
-                {order.order_number}
-              </p>
+              <p className="font-semibold">{order.order_number}</p>
               <p className="text-sm text-gray-500">
-                {order.user_email} - {order.payment_method === "transfer"
+                {order.user_email} -{" "}
+                {order.payment_method === "transfer"
                   ? "Transferencia bancaria"
-                  : "Mercado Pago"}
+                  : order.payment_method === "cash"
+                    ? "Efectivo en local"
+                    : "Mercado Pago"}
               </p>
             </div>
 

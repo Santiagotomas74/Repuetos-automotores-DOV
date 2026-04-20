@@ -27,7 +27,7 @@ type Order = {
     product_id: string;
     product_name: string;
     quantity: number;
-    price: number;
+    product_oem_number: string;
   }>;
 };
 
@@ -48,6 +48,7 @@ export default function AdminShipping() {
     try {
       const res = await fetch("/api/admin/shipping");
       const data = await res.json();
+      console.log(data);
       setOrders(data.orders);
     } catch (err) {
       console.error(err);
@@ -72,8 +73,8 @@ export default function AdminShipping() {
 
       setOrders((prev) =>
         prev.map((o) =>
-          o.id === orderId ? { ...o, order_status: newStatus } : o
-        )
+          o.id === orderId ? { ...o, order_status: newStatus } : o,
+        ),
       );
     } catch (err) {
       console.error(err);
@@ -87,26 +88,25 @@ export default function AdminShipping() {
   const sortByDate = (arr: Order[]) =>
     [...arr].sort(
       (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
   const pendingOrders = sortByDate(
-    orders.filter((o) => o.order_status === "dispatch")
+    orders.filter((o) => o.order_status === "dispatch"),
   );
   const inTransitOrders = sortByDate(
-    orders.filter((o) => o.order_status === "in_transit")
+    orders.filter((o) => o.order_status === "in_transit"),
   );
   const deliveredOrders = sortByDate(
-    orders.filter((o) => o.order_status === "delivered")
+    orders.filter((o) => o.order_status === "delivered"),
   );
 
   const currentOrders =
     activeTab === "pending"
       ? pendingOrders
       : activeTab === "transit"
-      ? inTransitOrders
-      : deliveredOrders;
+        ? inTransitOrders
+        : deliveredOrders;
 
   // 🔍 filtro de búsqueda
   const filteredOrders = currentOrders.filter((order) => {
@@ -123,9 +123,7 @@ export default function AdminShipping() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-500">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
-        <p className="text-sm font-medium animate-pulse">
-          Cargando pedidos...
-        </p>
+        <p className="text-sm font-medium animate-pulse">Cargando pedidos...</p>
       </div>
     );
 
@@ -138,9 +136,7 @@ export default function AdminShipping() {
         <button
           onClick={() => setActiveTab("pending")}
           className={`px-4 py-2 rounded-lg ${
-            activeTab === "pending"
-              ? "bg-black text-white"
-              : "bg-gray-200"
+            activeTab === "pending" ? "bg-black text-white" : "bg-gray-200"
           }`}
         >
           Pendientes ({pendingOrders.length})
@@ -149,9 +145,7 @@ export default function AdminShipping() {
         <button
           onClick={() => setActiveTab("transit")}
           className={`px-4 py-2 rounded-lg ${
-            activeTab === "transit"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+            activeTab === "transit" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
           En camino ({inTransitOrders.length})
@@ -191,15 +185,24 @@ export default function AdminShipping() {
           >
             <div className="flex justify-between">
               <div>
-                <p><strong>Orden:</strong> {order.order_number}</p>
-                <p><strong>Cliente:</strong> {order.user_email} {order.user_phone}</p>
-                <p><strong>Total:</strong> ${order.total_amount}</p>
+                <p>
+                  <strong>Orden:</strong> {order.order_number}
+                </p>
+                <p>
+                  <strong>Cliente:</strong> {order.user_email}{" "}
+                  {order.user_phone}
+                </p>
+                <p>
+                  <strong>Total:</strong> ${order.total_amount}
+                </p>
 
                 <p>
                   <strong>Método de pago:</strong>{" "}
-                  {order.payment_method === "Transfer"
-                    ? "Mercado Pago"
-                    : "Transferencia bancaria"}
+                  {order.payment_method === "transfer"
+                    ? "Transferencia bancaria"
+                    : order.payment_method === "cash"
+                      ? "Efectivo en local"
+                      : "Mercado Pago"}
                 </p>
 
                 <p
@@ -219,8 +222,8 @@ export default function AdminShipping() {
                   {order.order_status === "dispatch"
                     ? "Pendiente"
                     : order.order_status === "in_transit"
-                    ? "En camino"
-                    : "Entregado"}
+                      ? "En camino"
+                      : "Entregado"}
                 </p>
               </div>
 
@@ -232,9 +235,15 @@ export default function AdminShipping() {
             {/* 📍 Dirección */}
             {order.delivery_type === "shipping" && order.address && (
               <div className="bg-gray-50 p-3 rounded">
-                <p><strong>Dirección:</strong></p>
-                <p>{order.address.street} {order.address.number}</p>
-                <p>{order.address.city} - {order.address.province}</p>
+                <p>
+                  <strong>Dirección:</strong>
+                </p>
+                <p>
+                  {order.address.street} {order.address.number}
+                </p>
+                <p>
+                  {order.address.city} - {order.address.province}
+                </p>
                 <p>CP: {order.address.postal_code}</p>
               </div>
             )}
@@ -271,7 +280,8 @@ export default function AdminShipping() {
               <strong>Productos:</strong>
               {order.items.map((item) => (
                 <div key={item.product_id}>
-                  {item.product_name} - Cantidad: {item.quantity} - ${item.price}
+                  {item.product_name} - Cantidad: {item.quantity} - OEM:{" "}
+                  {item.product_oem_number}
                 </div>
               ))}
             </div>

@@ -60,56 +60,50 @@ export default function UserOrders() {
         return "bg-gray-100 text-gray-600";
     }
   };
-const getStatusLabel = (status: string, deliveryType: string) => {
-  const normalizedDelivery = deliveryType?.toLowerCase();
-  const normalizedStatus = status?.toLowerCase();
+  const getStatusLabel = (status: string, deliveryType: string) => {
+    const normalizedDelivery = deliveryType?.toLowerCase();
+    const normalizedStatus = status?.toLowerCase();
 
-  // ✅ caso especial: retiro completado
-  if (normalizedDelivery === "pickup" && normalizedStatus === "delivered") {
-    return "Retirado";
-  }
+    // ✅ caso especial: retiro completado
+    if (normalizedDelivery === "pickup" && normalizedStatus === "delivered") {
+      return "Retirado";
+    }
 
-  // 🔥 PRIORIDAD: retiro en local (pero no entregado)
-  if (normalizedDelivery === "pickup") {
-    return "Pendiente de retiro en el local";
-  }
+    // 🔥 PRIORIDAD: retiro en local (pero no entregado)
+    if (normalizedDelivery === "pickup") {
+      return "Pendiente de retiro en el local";
+    }
 
-  // 🚚 estados normales
-  switch (normalizedStatus) {
-    case "dispatch":
-      return "Pendiente de despacho";
-    case "in_transit":
-      return "En camino";
-    case "delivered":
-      return "Entregado";
-    default:
-      return status;
-  }
-};
+    // 🚚 estados normales
+    switch (normalizedStatus) {
+      case "dispatch":
+        return "Pendiente de despacho";
+      case "in_transit":
+        return "En camino";
+      case "delivered":
+        return "Entregado";
+      default:
+        return status;
+    }
+  };
 
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-500">
         <Loader2 className="w-8 h-8 animate-spin text-red-500 mb-3" />
-        <p className="text-sm font-medium animate-pulse">
-          Cargando pedidos...
-        </p>
+        <p className="text-sm font-medium animate-pulse">Cargando pedidos...</p>
       </div>
     );
 
   return (
     <section className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-      
       {/* HEADER */}
       <div className="p-8 border-b border-gray-50 flex items-center gap-2">
         <Package size={22} className="text-red-500" />
-        <h2 className="text-xl font-bold text-gray-800">
-          Mis Pedidos
-        </h2>
+        <h2 className="text-xl font-bold text-gray-800">Mis Pedidos</h2>
       </div>
 
-      <div className="divide-y divide-gray-50">
-
+      <div className="divide-y divide-gray-50 scrollbar-track-gray-50 max-h-[500px] overflow-y-auto">
         {orders.length === 0 && (
           <div className="p-16 text-center">
             <Package size={48} className="mx-auto text-gray-200 mb-4" />
@@ -121,10 +115,8 @@ const getStatusLabel = (status: string, deliveryType: string) => {
 
         {orders.map((order) => (
           <div key={order.id} className="p-8 space-y-6">
-
             {/* HEADER ORDEN */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-
               <div>
                 <p className="text-xs font-black text-gray-400 uppercase">
                   Orden #{order.order_number}
@@ -141,7 +133,7 @@ const getStatusLabel = (status: string, deliveryType: string) => {
 
               <span
                 className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${getStatusStyle(
-                  order.order_status
+                  order.order_status,
                 )}`}
               >
                 {getStatusLabel(order.order_status, order.delivery_type)}
@@ -150,13 +142,11 @@ const getStatusLabel = (status: string, deliveryType: string) => {
 
             {/* PRODUCTOS */}
             <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-
               <p className="text-xs font-black text-gray-400 uppercase mb-4">
                 Productos
               </p>
 
               <div className="space-y-3">
-
                 {order.items.map((item, index) => (
                   <div
                     key={index}
@@ -174,14 +164,12 @@ const getStatusLabel = (status: string, deliveryType: string) => {
                     </span>
                   </div>
                 ))}
-
               </div>
             </div>
 
             {/* DIRECCIÓN */}
             {order.delivery_type === "shipping" && order.address && (
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
-
                 <p className="text-xs font-black text-gray-400 uppercase mb-2">
                   Dirección de entrega
                 </p>
@@ -201,11 +189,17 @@ const getStatusLabel = (status: string, deliveryType: string) => {
                     </p>
                   )}
                 </div>
-
               </div>
             )}
           </div>
         ))}
+      </div>
+      {/* PIE DE LA SECCIÓN ÓRDENES */}
+
+      <div className="p-4 bg-gray-50/30 text-center border-t border-gray-50">
+        <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest italic">
+          Fin del listado
+        </p>
       </div>
     </section>
   );
