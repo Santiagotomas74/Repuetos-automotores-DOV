@@ -21,15 +21,60 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // 🔐 Sanitizar email
+  const sanitizeEmail = (value: string) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[<>{}"'`;()]/g, "");
+
+  // 🔐 Sanitizar password
+  const sanitizePassword = (value: string) =>
+    value.replace(/[<>]/g, "").slice(0, 100);
+
+  // 🔐 Validar email
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPassword = sanitizePassword(password);
+    // Validaciones frontend
+    if (!cleanEmail || !cleanPassword) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Debes completar email y contraseña.",
+      });
+      return;
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Email inválido",
+        text: "Ingresá un correo válido.",
+      });
+      return;
+    }
+
+    if (cleanPassword.length < 6) {
+      Swal.fire({
+        icon: "warning",
+        title: "Contraseña inválida",
+        text: "La contraseña debe tener al menos 6 caracteres.",
+      });
+      return;
+    }
 
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: cleanEmail, password: cleanPassword }),
       });
 
       const data = await res.json();

@@ -22,10 +22,22 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const handleSearch = () => {
-    if (!search.trim()) return;
+  // Helpers de sanitización / validación
+  const sanitizeSearch = (value: string) => {
+    return value
+      .normalize("NFKC") // normaliza unicode
+      .replace(/[<>`"'{}()[\]\\;]/g, "") // remueve chars peligrosos
+      .replace(/\s+/g, " ") // espacios duplicados
+      .trim()
+      .slice(0, 80); // límite largo
+  };
 
-    router.push(`/catalogo?search=${encodeURIComponent(search)}`);
+  const handleSearch = () => {
+    const cleanSearch = sanitizeSearch(search);
+
+    if (!cleanSearch) return;
+
+    router.push(`/catalogo?search=${encodeURIComponent(cleanSearch)}`);
   };
   const cartItemsCount = cartCount;
 
@@ -116,7 +128,7 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
               href="/"
               className="flex items-center gap-2 font-bold text-lg"
             >
-              <Image src="/DOVV.png" alt="Logo" width={130} height={200} />
+              <Image src="/DOVVV.png" alt="Logo" width={130} height={200} />
             </Link>
           </div>
 
@@ -185,7 +197,23 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
                     placeholder="Buscar por nombre, modelo o número OEM"
                     className="w-full py-2 outline-none text-sm sm:text-base text-gray-800"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    maxLength={80}
+                    autoComplete="off"
+                    spellCheck={false}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      // solo letras, números, espacios, guión, slash
+                      const filtered = value.replace(
+                        /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-_/]/g,
+                        "",
+                      );
+
+                      setSearch(filtered);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSearch();
+                    }}
                   />
                 </div>
 

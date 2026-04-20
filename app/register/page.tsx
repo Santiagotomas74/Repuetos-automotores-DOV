@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Lock, UserPlus, Phone, ArrowRight, Eye, EyeOff } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  UserPlus,
+  Phone,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function Register() {
@@ -16,17 +26,45 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ======================
+  // Sanitizadores
+  // ======================
+  const cleanText = (value: string) =>
+    value
+      .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trimStart()
+      .slice(0, 40);
+
+  const cleanEmail = (value: string) =>
+    value
+      .replace(/[^\w@.+-]/g, "")
+      .toLowerCase()
+      .slice(0, 120);
+
+  const cleanPhone = (value: string) =>
+    value.replace(/[^\d+]/g, "").slice(0, 20);
+
   const validateForm = () => {
-    if (name.trim().length < 3) {
-      return "El nombre debe tener al menos 3 caracteres";
+    if (name.trim().length < 2) {
+      return "El nombre debe tener al menos 2 caracteres";
+    }
+
+    if (lastName.trim().length < 2) {
+      return "El apellido debe tener al menos 2 caracteres";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(email)) {
       return "Correo electrónico inválido";
     }
 
-    if (!passwordRules.length || !passwordRules.uppercase || !passwordRules.number) {
+    if (
+      !passwordRules.length ||
+      !passwordRules.uppercase ||
+      !passwordRules.number
+    ) {
       return "La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número";
     }
 
@@ -61,10 +99,10 @@ export default function Register() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
-          lastName,
-          email,
-          phone,
+          name: name.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
           password,
         }),
       });
@@ -75,15 +113,15 @@ export default function Register() {
         setError(data.error || "Error al registrar usuario");
         return;
       }
-        Swal.fire({
-            text: "Registro exitoso. Redirigiendo a inicio de sesión...",
-            icon: "success",
-            confirmButtonText: "Iniciar sesión",
-          })
-          .then(() => {
-            window.location.href = "/login";
-          });
-      
+
+      await Swal.fire({
+        icon: "success",
+        title: "Cuenta creada",
+        text: "Registro exitoso. Ahora iniciá sesión.",
+        confirmButtonText: "Ir al login",
+      });
+
+      window.location.href = "/login";
     } catch (err) {
       console.error(err);
       setError("Error del servidor");
@@ -93,206 +131,192 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden tracking-tight">
-
-      {/* PANEL VISUAL IZQUIERDO */}
-      <div className="relative w-full md:w-1/2 h-[40vh] md:h-screen flex flex-col justify-center p-8 md:p-20 text-white overflow-hidden">
-
-       
-
-          <div 
-  className="absolute inset-0 bg-cover bg-center  animate-world" 
-  style={{ 
-    backgroundImage: "url('/frente.png')", // Cambia por tu imagen
-      
-  }}
-/>
-
-        <div className="relative z-10 space-y-6">
-      
-
-          <div className="space-y-2">
-           
-
-          </div>
-        </div>
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white overflow-hidden">
+      {/* IZQUIERDA */}
+      <div className="relative w-full md:w-1/2 h-[40vh] md:h-screen">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/frente.png')",
+          }}
+        />
       </div>
 
-      {/* FORMULARIO DERECHO (TU FORM ORIGINAL) */}
-      <div className="w-full md:w-1/2 min-h-[60vh] md:h-screen flex items-center justify-center bg-gray-50 p-4">
-
+      {/* DERECHA */}
+      <div className="w-full md:w-1/2 min-h-[60vh] md:h-screen flex items-center justify-center bg-gray-50 p-5">
         <div className="w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-black text-gray-900 mb-2 italic uppercase">Crear Cuenta</h1>
-            
-          </div>
+          <h1 className="text-4xl font-black text-gray-900 mb-8 uppercase italic text-center">
+            Crear Cuenta
+          </h1>
 
-          <div className=" p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-
-              {/* Nombre */}
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-3xl p-6 shadow space-y-4"
+          >
+            {/* Nombre / Apellido */}
             <div className="grid grid-cols-2 gap-3">
-
-             {/* Nombre */}
-            <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Nombre
-              </label>
-
-              <div className="relative group">
-      <          User
-                  className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors"
+              <div className="relative">
+                <User
                   size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 />
-
                 <input
                   type="text"
-                  placeholder="Juan"
+                  placeholder="Nombre"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  maxLength={40}
+                  onChange={(e) => setName(cleanText(e.target.value))}
+                  className="w-full pl-10 pr-3 py-3 border rounded-xl text-gray-900"
+                  required
+                />
+              </div>
+
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Apellido"
+                  value={lastName}
+                  maxLength={40}
+                  onChange={(e) => setLastName(cleanText(e.target.value))}
+                  className="w-full pl-10 pr-3 py-3 border rounded-xl text-gray-900"
                   required
                 />
               </div>
             </div>
 
-           {/* Apellido */}
-               <div>
-                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                   Apellido
-                 </label>
+            {/* Email */}
+            <div className="relative">
+              <Mail
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="email"
+                placeholder="correo@email.com"
+                value={email}
+                maxLength={120}
+                autoComplete="email"
+                spellCheck={false}
+                onChange={(e) => setEmail(cleanEmail(e.target.value))}
+                className="w-full pl-10 pr-3 py-3 border rounded-xl text-gray-900"
+                required
+              />
+            </div>
 
-                 <div className="relative group">
-                   <User
-                     className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors"
-                     size={18}
-                   />
+            {/* Teléfono */}
+            <div className="relative">
+              <Phone
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="tel"
+                placeholder="+5491112345678"
+                value={phone}
+                maxLength={20}
+                inputMode="numeric"
+                onChange={(e) => setPhone(cleanPhone(e.target.value))}
+                className="w-full pl-10 pr-3 py-3 border rounded-xl text-gray-900"
+                required
+              />
+            </div>
 
-                   <input
-                     type="text"
-        placeholder="Pérez"
-                     value={lastName}
-                     onChange={(e) => setLastName(e.target.value)}
-                     className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                     required
-                   />
-                 </div>
-               </div>
-
-             </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Correo electrónico</label>
-                <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors" size={18} />
-                  <input
-                    type="email"
-                    placeholder=" email@ejemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Teléfono móvil</label>
-                <div className="relative group">
-                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors" size={18} />
-                  <input
-                    type="tel"
-                    placeholder="+54 9 11 1234 5678"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Contraseña</label>
-
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors" size={18} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    required
-                  />
-                  <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800"
-                    >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                 </button>
-                </div>
-
-                <div className="text-xs mt-2 space-y-1">
-                  <p className={passwordRules.length ? "text-green-600" : "text-gray-400"}>
-                    • Mínimo 8 caracteres
-                  </p>
-                  <p className={passwordRules.uppercase ? "text-green-600" : "text-gray-400"}>
-                    • Al menos una letra mayúscula
-                  </p>
-                  <p className={passwordRules.number ? "text-green-600" : "text-gray-400"}>
-                    • Al menos un número
-                  </p>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Confirmar contraseña</label>
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-black transition-colors" size={18} />
-                  <input
-                     type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800"
-                 >
-                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                 </button>
-                </div>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500">{error}</p>
-              )}
+            {/* Password */}
+            <div className="relative">
+              <Lock
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Contraseña"
+                value={password}
+                maxLength={72}
+                autoComplete="new-password"
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 border rounded-xl text-gray-900"
+                required
+              />
 
               <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-5 mt-6 bg-black text-white rounded-[2rem] font-black shadow-2xl shadow-gray-200 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs group"
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
               >
-                {loading ? (
-                  "Creando cuenta..."
-                ) : (
-                  <>
-                    <UserPlus size={18} />
-                    Crear Cuenta
-                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                  
-                )}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+            </div>
 
-            </form>
-          </div>
+            {/* Confirm */}
+            <div className="relative">
+              <Lock
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Confirmar contraseña"
+                value={confirmPassword}
+                maxLength={72}
+                autoComplete="new-password"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 border rounded-xl text-gray-900"
+                required
+              />
+            </div>
+
+            {/* Rules */}
+            <div className="text-xs space-y-1">
+              <p
+                className={
+                  passwordRules.length ? "text-green-600" : "text-gray-400"
+                }
+              >
+                • Mínimo 8 caracteres
+              </p>
+              <p
+                className={
+                  passwordRules.uppercase ? "text-green-600" : "text-gray-400"
+                }
+              >
+                • Una mayúscula
+              </p>
+              <p
+                className={
+                  passwordRules.number ? "text-green-600" : "text-gray-400"
+                }
+              >
+                • Un número
+              </p>
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-500 font-medium">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 bg-black text-white rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-blue-700 transition disabled:opacity-60"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Creando...
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} />
+                  Crear Cuenta
+                  <ArrowRight size={18} />
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </div>
     </div>

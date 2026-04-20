@@ -142,7 +142,7 @@ export default function ProductDetail() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
         {/* LOGO */}
         <img
-          src="/DOVV.png"
+          src="/DOVVV.png"
           alt="Logo"
           className="w-28 h-auto object-contain animate-pulse"
         />
@@ -161,7 +161,7 @@ export default function ProductDetail() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
         <img
-          src="/DOVV.png"
+          src="/DOVVV.png"
           alt="Logo"
           className="w-28 h-auto object-contain "
         />

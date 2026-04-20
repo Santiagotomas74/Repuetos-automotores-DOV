@@ -2,95 +2,135 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
+
+// 🔐 Validación segura
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(120),
+  password: z.string().min(6).max(100),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    // ===============================
+    // 1️⃣ Leer body
+    // ===============================
+    const body = await req.json();
 
-    // 1️⃣ Buscar usuario
+    const parsed = loginSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
+    }
+
+    const { email, password } = parsed.data;
+
+    // ===============================
+    // 2️⃣ Buscar usuario
+    // ===============================
     const { rows } = await query(
-      `SELECT * FROM users WHERE email = $1`,
-      [email]
+      `
+      SELECT id, email, password, role
+      FROM users
+      WHERE email = $1
+      LIMIT 1
+      `,
+      [email],
     );
 
     if (rows.length === 0) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const user = rows[0];
 
-    // 2️⃣ Verificar password
+    // ===============================
+    // 3️⃣ Validar password
+    // ===============================
     const isValid = await bcrypt.compare(password, user.password);
 
     if (!isValid) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    // 3️⃣ Crear ACCESS TOKEN (corto)
-const accessToken = jwt.sign(
-  {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  },
-  process.env.JWT_SECRET!,
-  { expiresIn: "1h" } // 👈   
-);
+    // ===============================
+    // 4️⃣ Access Token
+    // ===============================
+    const accessToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1h",
+      },
+    );
 
-    // 4️⃣ Crear REFRESH TOKEN (largo)
+    // ===============================
+    // 5️⃣ Refresh Token
+    // ===============================
     const refreshToken = jwt.sign(
       {
         id: user.id,
         email: user.email,
-    role: user.role,
+        role: user.role,
       },
       process.env.JWT_REFRESH_SECRET!,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      },
     );
 
+    // ===============================
+    // 6️⃣ Response
+    // ===============================
     const response = NextResponse.json({
       success: true,
       role: user.role,
     });
 
-    // 📧 Email visible para frontend
+    // Email visible (opcional)
     response.cookies.set("emailDOV", user.email, {
       httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       path: "/",
+      maxAge: 60 * 60 * 24 * 7,
     });
 
- // 🔐 Access Token
-response.cookies.set("tokenTDOV", accessToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "lax",
-  path: "/",
-  maxAge: 60 * 60 * 2, // 👈 2 minutos
-});
+    // 🔐 Access Token
+    response.cookies.set("tokenTDOV", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60, // 1 hora
+    });
 
     // 🔄 Refresh Token
     response.cookies.set("refreshTokenDOV", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 días
+      maxAge: 60 * 60 * 24 * 7,
     });
-    console.log("Login exitoso para %s y token de 1 minuto:", email);
-    return response;
 
+    return response;
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
 
     return NextResponse.json(
-      { error: "Error en login" },
-      { status: 500 }
+      { error: "Error interno del servidor" },
+      { status: 500 },
     );
   }
 }

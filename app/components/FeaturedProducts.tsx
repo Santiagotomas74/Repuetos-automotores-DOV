@@ -23,7 +23,6 @@ export default function FeaturedProducts() {
       try {
         const res = await fetch("/api/products"); // tu endpoint
         const data: Product[] = await res.json();
-        
 
         // 🔀 mezclar productos (shuffle)
         const shuffled = data.sort(() => 0.5 - Math.random());
@@ -39,30 +38,27 @@ export default function FeaturedProducts() {
 
     fetchProducts();
   }, []);
-if (loading) {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white gap-6">
+        {/* LOGO */}
+        <img
+          src="/DOVVV.png"
+          alt="Logo"
+          className="w-28 h-auto object-contain animate-pulse"
+        />
 
-      {/* LOGO */}
-      <img
-        src="/DOVV.png"
-        alt="Logo"
-        className="w-28 h-auto object-contain animate-pulse"
-      />
-
-      {/* SPINNER */}
-      <div className="flex flex-col items-center gap-2 text-gray-600">
-        <Loader2 className="w-8 h-8 animate-spin text-[#00173D]" />
-        <p className="text-sm font-medium">Cargando productos...</p>
+        {/* SPINNER */}
+        <div className="flex flex-col items-center gap-2 text-gray-600">
+          <Loader2 className="w-8 h-8 animate-spin text-[#00173D]" />
+          <p className="text-sm font-medium">Cargando productos...</p>
+        </div>
       </div>
-
-    </div>
-  );
-}
+    );
+  }
   return (
     <section className="bg-[#f8fafd] py-12">
       <div className="max-w-6xl mx-auto px-4">
-
         {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -79,13 +75,11 @@ if (loading) {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-
           {products.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden hover:shadow-md transition"
             >
-
               {/* IMAGE */}
               <div className="relative h-48 bg-gray-200">
                 <img
@@ -96,9 +90,7 @@ if (loading) {
               </div>
 
               <div className="p-5 flex flex-col flex-1">
-                <h3 className="font-semibold text-[#00173D]">
-                  {product.name}
-                </h3>
+                <h3 className="font-semibold text-[#00173D]">{product.name}</h3>
 
                 <p className="text-sm mt-2 text-black">
                   OEM: {product.oem_number}
@@ -118,9 +110,7 @@ if (loading) {
               </div>
             </div>
           ))}
-
         </div>
-
       </div>
     </section>
   );
