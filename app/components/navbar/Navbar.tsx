@@ -89,15 +89,23 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
   }, []);
 
   const handleLogout = async () => {
-    localStorage.removeItem(process.env.NEXT_PUBLIC_ADMIN_KEY!);
-    await fetch("/api/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      // borrar admin flag
+      localStorage.removeItem(process.env.NEXT_PUBLIC_ADMIN_KEY!);
 
-    setIsLoggedIn(false);
-    setUserName(null);
-    router.refresh();
+      await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      setIsLoggedIn(false);
+      setUserName(null);
+
+      // recarga total para limpiar estados + navbar
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
   };
 
   if (loading) return null;

@@ -6,7 +6,8 @@ const brands = [
   {
     id: 1,
     name: "Volkswagen",
-    image: "https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg",
   },
   {
     id: 2,
@@ -28,24 +29,22 @@ export default function BrandsSection() {
   };
 
   return (
-    <section className="bg-white py-12 mb-12">
+    <section className="bg-[#f8fafd] py-12">
       <div className="max-w-6xl mx-auto px-4">
-
         {/* HEADER */}
-        <div className="mb-8">
+        <div className="mb-8 ">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center">
             Marcas que trabajamos
           </h2>
         </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {brands.map((brand) => (
             <div
               key={brand.id}
               onClick={() => handleClick(brand.name)}
-              className="bg-[#f8fafd] rounded-xl p-6 flex items-center justify-center hover:shadow-md transition cursor-pointer"
+              className="bg-[#f8fafd] rounded-xl p-6 flex items-center justify-center shadow-md transition cursor-pointer"
             >
               <img
                 src={brand.image}
@@ -54,9 +53,7 @@ export default function BrandsSection() {
               />
             </div>
           ))}
-
         </div>
-
       </div>
     </section>
   );

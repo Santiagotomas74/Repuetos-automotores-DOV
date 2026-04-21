@@ -13,9 +13,8 @@ export default function ContactPage() {
   };
 
   return (
-    <section className="bg-blue-600 py-16 px-4 mt-10">
+    <section className="bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55] py-16 px-4 mt-5">
       <div className="max-w-6xl mx-auto">
-
         {/* HEADER */}
         <div className="text-center mb-12 mt-10 sm:mt-0 md:mt-0">
           <h2 className="text-3xl md:text-4xl font-bold text-white">
@@ -27,16 +26,13 @@ export default function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-
           {/* INFO */}
           <div className="bg-white p-8 rounded-2xl shadow-md border space-y-6">
-
             <h3 className="text-xl font-bold text-[#00173D]">
               Información de contacto
             </h3>
 
             <div className="space-y-4 text-gray-700">
-
               <div className="flex items-center gap-3">
                 <MapPin className="text-[#00AEEF]" />
                 <span>Buenos Aires, Argentina</span>
@@ -53,7 +49,6 @@ export default function ContactPage() {
                 <span>Lunes a Viernes: 8AM - 7PM</span>
                 <span>Sábados: 9AM - 5PM</span>
               </div>
-
             </div>
 
             {/* CTA */}
@@ -65,11 +60,10 @@ export default function ContactPage() {
               Escribir por WhatsApp
             </button>
             <img
-  src="/frente.png"
-  alt="imagen de la tienda"
-  className="w-150 h-64 object-cover"
-/>
-
+              src="/frente.png"
+              alt="imagen de la tienda"
+              className="w-150 h-64 object-cover"
+            />
           </div>
 
           {/* MAPA */}
@@ -80,9 +74,7 @@ export default function ContactPage() {
               loading="lazy"
             ></iframe>
           </div>
-
         </div>
-
       </div>
     </section>
   );
