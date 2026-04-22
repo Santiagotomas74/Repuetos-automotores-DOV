@@ -22,7 +22,7 @@ export default function UserDashboard() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"pedidos" | "ordenes" | "pagos">(
-    "pedidos",
+    "ordenes",
   );
 
   const [uploadingOrderId, setUploadingOrderId] = useState<string | null>(null);
@@ -169,17 +169,6 @@ export default function UserDashboard() {
               <div className="p-4 border-b border-gray-100">
                 <div className="grid grid-cols-3 gap-3">
                   <button
-                    onClick={() => setActiveTab("pedidos")}
-                    className={`py-3 rounded-2xl text-sm font-bold transition ${
-                      activeTab === "pedidos"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    Mis Pedidos
-                  </button>
-
-                  <button
                     onClick={() => setActiveTab("ordenes")}
                     className={`py-3 rounded-2xl text-sm font-bold transition ${
                       activeTab === "ordenes"
@@ -188,6 +177,16 @@ export default function UserDashboard() {
                     }`}
                   >
                     Órdenes
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("pedidos")}
+                    className={`py-3 rounded-2xl text-sm font-bold transition ${
+                      activeTab === "pedidos"
+                        ? "bg-red-500 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Mis Pedidos
                   </button>
 
                   <button

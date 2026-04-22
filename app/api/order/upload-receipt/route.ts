@@ -83,12 +83,17 @@ export async function POST(req: Request) {
     const imageUrl = uploadResult.secure_url;
 
     await query(
-      `UPDATE orders
-   SET payment_receipt_url = $1,
-       payment_status = 'receipt_uploaded',
-       expires_at = GREATEST(expires_at,NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires') + INTERVAL '${EXTRA_TIME_HOURS} hours',
-       updated_at = NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires',
-   WHERE id = $2`,
+      `
+  UPDATE orders
+  SET payment_receipt_url = $1,
+      payment_status = 'receipt_uploaded',
+      expires_at = GREATEST(
+        expires_at,
+        NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires'
+      ) + INTERVAL '${EXTRA_TIME_HOURS} hours',
+      updated_at = NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires'
+  WHERE id = $2
+  `,
       [imageUrl, orderId],
     );
     await sendReceiptUploadedEmail(orderId, imageUrl);
