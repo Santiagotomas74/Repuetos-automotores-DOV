@@ -61,7 +61,7 @@ export default function CartSidebar({
     street_number: "",
     apartment: "",
     city: "",
-    province: "",
+    province: "Buenos Aires",
     postal_code: "",
     additional_info: "",
   });
@@ -157,24 +157,168 @@ export default function CartSidebar({
 
   const total =
     deliveryType === "shipping" ? subtotal + shippingCost : subtotal;
+
   const validateAddress = () => {
+    const fullName = address.full_name.trim();
+    const phone = address.phone?.trim() || "";
+    const street = address.street.trim();
+    const streetNumber = address.street_number.trim();
+    const city = address.city.trim();
+    const province = address.province.trim();
+    const postalCode = address.postal_code.trim();
+
+    // Regex
+    const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+    const phoneRegex = /^[0-9+\s()-]+$/;
+    const streetRegex = /^[a-zA-ZÀ-ÿ0-9\s.\-]+$/;
+    const cityRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+    const numberRegex = /^[0-9]+$/;
+    const postalRegex = /^[0-9]+$/;
+
+    // Vacíos
     if (
-      !address.full_name ||
-      !address.street ||
-      !address.street_number ||
-      !address.city ||
-      !address.province ||
-      !address.postal_code
+      !fullName ||
+      !phone ||
+      !street ||
+      !streetNumber ||
+      !city ||
+      !province ||
+      !postalCode
     ) {
       Swal.fire({
         icon: "warning",
         title: "Faltan datos",
-        text: "Completá todos los campos obligatorios para continuar",
-        confirmButtonText: "Ok",
+        text: "Completá todos los campos obligatorios.",
         confirmButtonColor: "#2563eb",
       });
       return false;
     }
+
+    // Nombre
+    if (fullName.length < 3 || fullName.length > 60) {
+      Swal.fire({
+        icon: "warning",
+        title: "Nombre inválido",
+        text: "El nombre debe tener entre 3 y 60 caracteres.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+    if (phone.length < 8 || phone.length > 20) {
+      Swal.fire({
+        icon: "warning",
+        title: "Teléfono inválido",
+        text: "Debe tener entre 8 y 20 caracteres.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    if (!nameRegex.test(fullName)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Nombre inválido",
+        text: "Solo se permiten letras y espacios.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    // Calle
+    if (street.length < 3 || street.length > 80) {
+      Swal.fire({
+        icon: "warning",
+        title: "Calle inválida",
+        text: "La calle debe tener entre 3 y 80 caracteres.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    if (!streetRegex.test(street)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Calle inválida",
+        text: "La calle contiene caracteres no permitidos.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    // Número
+    if (streetNumber.length < 1 || streetNumber.length > 6) {
+      Swal.fire({
+        icon: "warning",
+        title: "Número inválido",
+        text: "La numeración debe tener entre 1 y 6 dígitos.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    if (!numberRegex.test(streetNumber)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Número inválido",
+        text: "Solo se permiten números.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    // Ciudad
+    if (city.length < 2 || city.length > 50) {
+      Swal.fire({
+        icon: "warning",
+        title: "Ciudad inválida",
+        text: "La ciudad debe tener entre 2 y 50 caracteres.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    if (!cityRegex.test(city)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Ciudad inválida",
+        text: "Solo se permiten letras y espacios.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    // Provincia
+    if (province !== "Buenos Aires") {
+      Swal.fire({
+        icon: "warning",
+        title: "Zona no disponible",
+        text: "Solo realizamos envíos en Buenos Aires.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    // Código postal
+    if (postalCode.length < 4 || postalCode.length > 8) {
+      Swal.fire({
+        icon: "warning",
+        title: "Código postal inválido",
+        text: "Debe tener entre 4 y 8 dígitos.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
+    if (!postalRegex.test(postalCode)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Código postal inválido",
+        text: "Solo se permiten números.",
+        confirmButtonColor: "#2563eb",
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -605,6 +749,11 @@ export default function CartSidebar({
                         Completá los datos obligatorios (*) para recibir tu
                         pedido.
                       </p>
+                      <p className="text-sm text-red-500 mt-1">
+                        Por el momento solo realizamos envíos dentro de Buenos
+                        Aires. Si estás en el interior, podés enviarnos un
+                        mesaje y te contactamos.
+                      </p>
                     </div>
 
                     {/* Formulario */}
@@ -658,14 +807,25 @@ export default function CartSidebar({
                           }
                           className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
                         />
-                        <input
-                          placeholder="Provincia *"
-                          value={address.province}
-                          onChange={(e) =>
-                            setAddress({ ...address, province: e.target.value })
-                          }
-                          className="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        />
+                        {/* Provincia fija con tooltip al hover/focus */}
+                        <div className="relative group">
+                          <input
+                            value="Buenos Aires"
+                            disabled
+                            className="bg-gray-100 border border-gray-200 p-3.5 rounded-xl text-sm text-gray-500 w-full cursor-not-allowed"
+                          />
+
+                          {/* Mensaje */}
+                          <div className="absolute left-0 -top-14 hidden group-hover:block group-focus-within:block z-20">
+                            <div className="bg-black text-white text-xs px-3 py-2 rounded-xl shadow-lg whitespace-nowrap">
+                              🚚 Solo realizamos envíos dentro de la Provincia
+                              de Buenos Aires
+                            </div>
+
+                            {/* Flechita */}
+                            <div className="w-3 h-3 bg-black rotate-45 ml-4 -mt-1"></div>
+                          </div>
+                        </div>
                       </div>
 
                       <input
@@ -680,7 +840,10 @@ export default function CartSidebar({
                         className="w-full bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
                       />
                     </div>
-
+                    <p className="text-sm text-gray-900 mt-1">
+                      Por cualquier otro detalle del domicilio, por favor
+                      contáctanos.
+                    </p>
                     {/* Botón con validación reforzada */}
                     <button
                       onClick={() => {
