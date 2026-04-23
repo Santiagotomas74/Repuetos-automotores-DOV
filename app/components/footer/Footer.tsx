@@ -177,7 +177,7 @@ export default function Footer() {
                 <path d="M1 16h21" />
               </svg>
               <span className="font-semibold text-sm">
-                Envíos a todo el país
+                Envíos exclusivos a CABA y GBA
               </span>
             </div>
 
@@ -202,7 +202,7 @@ export default function Footer() {
                 />
               </svg>
               <span className="font-semibold text-sm">
-                Repuestos VW originales
+                Repuestos originales y alternativos
               </span>
             </div>
 
@@ -221,7 +221,7 @@ export default function Footer() {
                   d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
                 />
               </svg>
-              <span className="font-semibold text-sm">Garantía oficial</span>
+              <span className="font-semibold text-sm">Garantía a roturas</span>
             </div>
 
             {/* Beneficio 4 */}
