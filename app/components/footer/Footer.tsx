@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Columna 1: Marca */}
           <div>
-            <h3 className="text-xl font-bold mb-4">DOV Respuestos</h3>
+            <h3 className="text-xl font-bold mb-4">DOV Repuestos</h3>
             <p className="text-gray-300 text-sm leading-relaxed pr-4">
               Somos una casa de repuestos especializada en Linea Volkswagen,
               Chevrolet y Renault. Trabajamos tanto piezas originales como
