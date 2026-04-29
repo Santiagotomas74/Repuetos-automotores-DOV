@@ -324,7 +324,7 @@ export default function Footer() {
               <FaWhatsapp size={20} />
             </a>
 
-            {/* Web 
+            {/* Web */}
             <a
               href="https://santiago-taher-portafolio.vercel.app/services"
               target="_blank"
@@ -346,7 +346,6 @@ export default function Footer() {
                 <line x1="2" y1="12" x2="22" y2="12" />
               </svg>
             </a>
-            */}
           </div>
         </div>
       </div>
