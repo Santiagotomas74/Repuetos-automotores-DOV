@@ -133,12 +133,6 @@ export async function POST(req: Request) {
 
     let expiresAt = new Date(nowAR.getTime() + 15 * 60 * 1000);
 
-    // TRANSFERENCIA
-    if (payment_method === "transfer") {
-      total = Math.round(total * 0.85);
-      expiresAt = new Date(nowAR.getTime() + 2 * 60 * 60 * 1000);
-    }
-
     // EFECTIVO SOLO RETIRO LOCAL
     if (payment_method === "cash") {
       if (delivery_type !== "pickup") {

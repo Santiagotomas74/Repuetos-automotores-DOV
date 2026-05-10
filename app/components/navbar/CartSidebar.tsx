@@ -902,12 +902,11 @@ export default function CartSidebar({
                             ${total.toLocaleString()}
                           </span>
                         </div>
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-900 mt-2">
+                          Compra protegida · Pago 100% seguro · Aceptamos todas
+                          las tarjetas
+                        </div>
                       </button>
-
-                      <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-900 mt-2">
-                        Compra protegida · Pago 100% seguro · Aceptamos todas
-                        las tarjetas
-                      </div>
                     </div>
 
                     {/* TRANSFERENCIA */}
@@ -936,18 +935,11 @@ export default function CartSidebar({
 
                           <div className="text-right">
                             <span className="block text-lg font-bold text-gray-900">
-                              ${discountedTotal.toLocaleString()}
-                            </span>
-                            <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-semibold">
-                              15% OFF
+                              ${total.toLocaleString()}
                             </span>
                           </div>
                         </div>
                       </button>
-
-                      <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-xs text-green-900 mt-2">
-                        Ahorrás pagando por transferencia
-                      </div>
                     </div>
                     {/* EFECTIVO EN LOCAL */}
                     {deliveryType === "pickup" && (
@@ -977,12 +969,11 @@ export default function CartSidebar({
                               ${total.toLocaleString()}
                             </span>
                           </div>
+                          <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-xs text-yellow-900 mt-2">
+                            Reservamos tu pedido por 16 horas hasta que pases a
+                            retirarlo.
+                          </div>
                         </button>
-
-                        <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-xs text-yellow-900 mt-2">
-                          Reservamos tu pedido por 16 horas hasta que pases a
-                          retirarlo.
-                        </div>
                       </div>
                     )}
                   </div>
@@ -996,20 +987,23 @@ export default function CartSidebar({
 
                     <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2  ">
                       <p className="text-black">
-                        <strong>CBU:</strong> 0000003100000000000000
+                        <strong>CVU:</strong> 0000003100004743991603
                       </p>
                       <p className="text-black">
-                        <strong>Alias:</strong> Dov.PAGOS
+                        <strong>Alias:</strong> repuestos.dov
                       </p>
                       <p className="text-black">
-                        <strong>Titular:</strong> Dov S.A.
+                        <strong>Titular:</strong> Omar Daniel Vallejos
+                      </p>
+                      <p className="text-black">
+                        <strong>CUIT/CUIL:</strong> 23-23036472-9
                       </p>
                     </div>
 
                     <p className="text-sm text-gray-900">
                       El total que deberás transferir es exactamente{" "}
-                      <strong>${discountedTotal.toLocaleString()}</strong> para
-                      que podamos identificar tu pago.
+                      <strong>${total.toLocaleString()}</strong> para que
+                      podamos identificar tu pago.
                     </p>
 
                     <p className="text-sm text-gray-900">
