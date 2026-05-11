@@ -34,6 +34,7 @@ export function proxy(req: NextRequest) {
       const allowedAdmins = [
         "santiago_lucas1@hotmail.com",
         "augustoda0202@gmail.com",
+        "lucasnatanielacosta@gmail.com",
       ];
 
       if (

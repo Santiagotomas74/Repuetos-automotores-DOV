@@ -95,7 +95,8 @@ export default function Login() {
 
       if (
         (data.role === "admin" && email === "santiago_lucas1@hotmail.com") ||
-        email === "augustoda0202@gmail.com"
+        email === "augustoda0202@gmail.com" ||
+        email === "lucasnatanielacosta@gmail.com"
       ) {
         localStorage.setItem(process.env.NEXT_PUBLIC_ADMIN_KEY!, "true");
         Swal.fire({
