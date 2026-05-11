@@ -137,7 +137,7 @@ export default function Products() {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`/api/products/${id}`, {
+      await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
       });
 
@@ -167,9 +167,7 @@ export default function Products() {
             Productos para vender
           </h1>
 
-          <p className="text-sm text-gray-500">
-            Gestiona tu catálogo
-          </p>
+          <p className="text-sm text-gray-500">Gestiona tu catálogo</p>
         </div>
 
         <Link
@@ -209,9 +207,7 @@ export default function Products() {
                 <div
                   key={p.id}
                   className={`p-4 space-y-3 ${
-                    p.disabled
-                      ? "bg-red-50 border-l-4 border-red-500"
-                      : ""
+                    p.disabled ? "bg-red-50 border-l-4 border-red-500" : ""
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -239,15 +235,10 @@ export default function Products() {
                           type="number"
                           value={newPrice}
                           autoFocus
-                          onChange={(e) =>
-                            setNewPrice(e.target.value)
-                          }
-                          onBlur={() =>
-                            handleUpdatePrice(p.id)
-                          }
+                          onChange={(e) => setNewPrice(e.target.value)}
+                          onBlur={() => handleUpdatePrice(p.id)}
                           onKeyDown={(e) =>
-                            e.key === "Enter" &&
-                            handleUpdatePrice(p.id)
+                            e.key === "Enter" && handleUpdatePrice(p.id)
                           }
                           className="border rounded px-2 py-1 mt-2 w-24"
                         />
@@ -273,15 +264,10 @@ export default function Products() {
                         type="number"
                         value={newStock}
                         autoFocus
-                        onChange={(e) =>
-                          setNewStock(e.target.value)
-                        }
-                        onBlur={() =>
-                          handleUpdateStock(p.id)
-                        }
+                        onChange={(e) => setNewStock(e.target.value)}
+                        onBlur={() => handleUpdateStock(p.id)}
                         onKeyDown={(e) =>
-                          e.key === "Enter" &&
-                          handleUpdateStock(p.id)
+                          e.key === "Enter" && handleUpdateStock(p.id)
                         }
                         className="border rounded px-2 py-1 w-24"
                       />
@@ -295,8 +281,8 @@ export default function Products() {
                           p.stock > 5
                             ? "bg-green-100 text-green-700"
                             : p.stock > 0
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
                         }`}
                       >
                         Stock: {p.stock}
@@ -352,9 +338,7 @@ export default function Products() {
                     <tr
                       key={p.id}
                       className={`hover:bg-gray-50 ${
-                        p.disabled
-                          ? "bg-red-50"
-                          : ""
+                        p.disabled ? "bg-red-50" : ""
                       }`}
                     >
                       {/* PRODUCTO */}
@@ -388,15 +372,10 @@ export default function Products() {
                             type="number"
                             value={newPrice}
                             autoFocus
-                            onChange={(e) =>
-                              setNewPrice(e.target.value)
-                            }
-                            onBlur={() =>
-                              handleUpdatePrice(p.id)
-                            }
+                            onChange={(e) => setNewPrice(e.target.value)}
+                            onBlur={() => handleUpdatePrice(p.id)}
                             onKeyDown={(e) =>
-                              e.key === "Enter" &&
-                              handleUpdatePrice(p.id)
+                              e.key === "Enter" && handleUpdatePrice(p.id)
                             }
                             className="w-24 border rounded px-2 py-1"
                           />
@@ -420,15 +399,10 @@ export default function Products() {
                             type="number"
                             value={newStock}
                             autoFocus
-                            onChange={(e) =>
-                              setNewStock(e.target.value)
-                            }
-                            onBlur={() =>
-                              handleUpdateStock(p.id)
-                            }
+                            onChange={(e) => setNewStock(e.target.value)}
+                            onBlur={() => handleUpdateStock(p.id)}
                             onKeyDown={(e) =>
-                              e.key === "Enter" &&
-                              handleUpdateStock(p.id)
+                              e.key === "Enter" && handleUpdateStock(p.id)
                             }
                             className="w-24 border rounded px-2 py-1"
                           />
@@ -442,8 +416,8 @@ export default function Products() {
                               p.stock > 5
                                 ? "bg-green-100 text-green-700"
                                 : p.stock > 0
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-700"
                             }`}
                           >
                             {p.stock}

@@ -4,83 +4,75 @@ import { query } from "@/db";
 // 🔹 GET producto por ID
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
   try {
     console.log("ID recibido en GET:", id);
 
-    const { rows } = await query(`
+    const { rows } = await query(
+      `
       SELECT * FROM products WHERE id = $1
       `,
-      [id]
+      [id],
     );
 
     if (rows.length === 0) {
       return NextResponse.json(
         { error: "Producto no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error en GET product:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
   try {
-    
     const { price, stock } = await req.json();
     console.log("Datos recibidos en PATCH:", { price, stock });
 
     if (price === undefined && stock === undefined) {
       return NextResponse.json(
         { error: "Precio o stock requerido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (price !== undefined) {
-      await query(
-        `UPDATE products SET price = $1 WHERE id = $2`,
-        [price, id]
-      );
+      await query(`UPDATE products SET price = $1 WHERE id = $2`, [price, id]);
     }
 
     if (stock !== undefined) {
-      await query(
-        `UPDATE products SET stock = $1 WHERE id = $2`,
-        [stock, id]
-      );
+      await query(`UPDATE products SET stock = $1 WHERE id = $2`, [stock, id]);
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error("Error en PATCH price or stock:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
@@ -97,10 +89,10 @@ export async function PUT(
     image4,
     brand,
     compatible_models,
-    part_type
+    part_type,
   } = await req.json();
-console.log(price);
-console.log(stock);
+  console.log(price);
+  console.log(stock);
   // 🔧 FORMAT MODELS
   const formattedModel =
     compatible_models && compatible_models.length > 0
@@ -144,7 +136,7 @@ console.log(stock);
        RETURNING *`,
       [
         oem_number,
-        formattedOEM,       // 🔥 FIX
+        formattedOEM, // 🔥 FIX
         name,
         stock,
         description,
@@ -154,38 +146,19 @@ console.log(stock);
         image3,
         image4,
         brand,
-        formattedModel,     // 🔥 FIX
+        formattedModel, // 🔥 FIX
         part_type,
         id,
-      ]
+      ],
     );
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error en PUT product:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  const { id } = await context.params;
-
-  try { 
-      await query(`DELETE FROM products WHERE id=$1`, [id]);
-    return NextResponse.json({ success: true }, { status: 200 }   );
-  } catch (error) {
-    console.error("Error en DELETE product:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -5,6 +5,7 @@ export async function GET() {
   const { rows } = await query(`
     SELECT * FROM products
     WHERE disabled = false
+    AND is_active = TRUE
     ORDER BY id ASC;
   `);
 
@@ -23,9 +24,9 @@ export async function POST(req: NextRequest) {
     image2,
     image3,
     image4,
-    part_type,        // 🔹 tipo de repuesto
-    compatible_models,       // 🔹 modelo compatible
-    brand        // 🔹 marca
+    part_type, // 🔹 tipo de repuesto
+    compatible_models, // 🔹 modelo compatible
+    brand, // 🔹 marca
   } = await req.json();
 
   try {
@@ -63,18 +64,17 @@ export async function POST(req: NextRequest) {
         image4,
         part_type,
         compatible_models,
-        brand
-      ]
+        brand,
+      ],
     );
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error creando producto:", error);
 
     return NextResponse.json(
       { error: "Error al crear producto" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

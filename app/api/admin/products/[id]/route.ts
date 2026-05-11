@@ -4,31 +4,27 @@ import { query } from "@/db";
 // 🔹 GET producto por ID
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
   try {
-    const { rows } = await query(
-      `SELECT * FROM products WHERE id = $1`,
-      [id]
-    );
+    const { rows } = await query(`SELECT * FROM products WHERE id = $1`, [id]);
 
     if (rows.length === 0) {
       return NextResponse.json(
         { error: "Producto no encontrado" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error en GET product:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -36,53 +32,42 @@ export async function GET(
 // 🔥 PATCH precio / stock / disabled
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
   try {
     const { price, stock, disabled } = await req.json();
 
-    if (
-      price === undefined &&
-      stock === undefined &&
-      disabled === undefined
-    ) {
+    if (price === undefined && stock === undefined && disabled === undefined) {
       return NextResponse.json(
         { error: "Nada para actualizar" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (price !== undefined) {
-      await query(
-        `UPDATE products SET price = $1 WHERE id = $2`,
-        [price, id]
-      );
+      await query(`UPDATE products SET price = $1 WHERE id = $2`, [price, id]);
     }
 
     if (stock !== undefined) {
-      await query(
-        `UPDATE products SET stock = $1 WHERE id = $2`,
-        [stock, id]
-      );
+      await query(`UPDATE products SET stock = $1 WHERE id = $2`, [stock, id]);
     }
 
     if (disabled !== undefined) {
-      await query(
-        `UPDATE products SET disabled = $1 WHERE id = $2`,
-        [disabled, id]
-      );
+      await query(`UPDATE products SET disabled = $1 WHERE id = $2`, [
+        disabled,
+        id,
+      ]);
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error("Error en PATCH product:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -90,7 +75,7 @@ export async function PATCH(
 // 🔹 PUT editar producto completo
 export async function PUT(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
@@ -107,7 +92,7 @@ export async function PUT(
     image4,
     brand,
     compatible_models,
-    part_type
+    part_type,
   } = await req.json();
 
   const formattedModel =
@@ -164,42 +149,44 @@ export async function PUT(
         formattedModel,
         part_type,
         id,
-      ]
+      ],
     );
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error en PUT product:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-// 🔹 DELETE producto
+// 🔹 DESACTIVAR producto
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
 
   try {
-    await query(`DELETE FROM products WHERE id = $1`, [id]);
-
-    return NextResponse.json(
-      { success: true },
-      { status: 200 }
+    await query(
+      `
+      UPDATE products
+      SET is_active = FALSE
+      WHERE id = $1
+      `,
+      [id],
     );
 
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error en DELETE product:", error);
+    console.error("Error desactivando producto:", error);
 
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
