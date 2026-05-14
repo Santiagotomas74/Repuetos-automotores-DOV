@@ -116,7 +116,8 @@ export default function Navbar({ items, cartCount }: NavbarProps) {
       <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-sm">
         {/* 🔵 TOP BAR */}
         <div className="bg-[#0b2a5b] text-white text-sm text-center py-2">
-          Envíos gratis en Zona San Miguel - Compras seguras con Mercado Pago
+          Envios gratis en Zona San Miguel a partir de $100.000 - Compras
+          seguras con Mercado Pago
         </div>
 
         {/* MAIN ROW */}
