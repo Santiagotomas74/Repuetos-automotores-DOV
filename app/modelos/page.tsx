@@ -129,32 +129,42 @@ export default function Models() {
           <h1 className="text-4xl md:text-[42px] lg:text-5xl font-black leading-[1.02] tracking-tight text-blue-900">
             Nuestros modelos disponibles
           </h1>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900"></h2>
 
           <p className="text-gray-500 mt-2 text-sm md:text-base">
             Encuentra los repuestos perfectos para tu modelo de auto
           </p>
 
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {" "}
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center">
             {models.map((model, index) => (
               <div
                 key={index}
                 onClick={() => handleClick(model.name)}
-                className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer w-full max-w-[320px] hover:-translate-y-1"
+                className="
+            bg-white
+            rounded-2xl
+            shadow-sm
+            hover:shadow-xl
+            transition-all
+            duration-300
+            overflow-hidden
+            cursor-pointer
+            w-full
+            sm:max-w-[320px]
+            hover:-translate-y-1
+          "
               >
                 <img
                   src={model.image}
                   alt={model.name}
-                  className="w-full h-36 object-cover"
+                  className="w-full h-52 object-cover"
                 />
 
-                <div className="p-4 bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55]">
-                  <h3 className="font-semibold text-white text-sm md:text-base">
+                <div className="p-5 bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55]">
+                  <h3 className="font-semibold text-white text-lg">
                     {model.name}
                   </h3>
 
-                  <span className="text-xs text-gray-200">Ver repuestos</span>
+                  <span className="text-sm text-gray-200">Ver repuestos</span>
                 </div>
               </div>
             ))}

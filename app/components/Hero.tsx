@@ -29,7 +29,7 @@ export default function Hero() {
         {/* LEFT */}
         <div className="space-y-5 md:space-y-8 ml-5 lg:space-y-6">
           {/* BADGE */}
-          <div className="inline-flex items-center gap-2  border border-cyan-400/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 mt-15 md:mt-0 border border-cyan-400/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
             <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
 
             <span className="text-xs text-cyan-100">
