@@ -27,7 +27,6 @@ export default function Categories() {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-
           {categories.map((cat, index) => {
             const Icon = cat.icon;
 
@@ -39,13 +38,10 @@ export default function Categories() {
               >
                 <Icon className="h-12 w-12 text-[#0a1f44] mb-5 group-hover:scale-110 transition-transform" />
 
-                <p className="text-lg font-medium text-[#0a1f44]">
-                  {cat.name}
-                </p>
+                <p className="text-lg font-medium text-[#0a1f44]">{cat.name}</p>
               </div>
             );
           })}
-
         </div>
       </div>
     </section>

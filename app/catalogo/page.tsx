@@ -67,9 +67,15 @@ export default function ProductsPage() {
 
     const modelsArray = Array.isArray(p.compatible_models)
       ? p.compatible_models
-      : [];
-
-    const models = modelsArray.join(" ").toLowerCase();
+      : String(p.compatible_models || "")
+          .replace(/[{}"]/g, "") // elimina { } y "
+          .split(",")
+          .map((m) => m.trim())
+          .filter(Boolean);
+    const normalizedModels = modelsArray.map((m: string) =>
+      m.toLowerCase().trim(),
+    );
+    const models = normalizedModels.join(" ");
 
     const oemEquivalents = Array.isArray(p.oem_equivalents)
       ? p.oem_equivalents.join(" ").toLowerCase()
@@ -97,9 +103,12 @@ export default function ProductsPage() {
     const matchMarca = marca ? brandArray.includes(marca.toLowerCase()) : true;
 
     // 🔵 MODELO
+
     const matchModel =
-      (selectedModel === "Todos" || modelsArray.includes(selectedModel)) &&
-      (!modelFromURL || modelsArray.includes(modelFromURL));
+      selectedModel === "Todos" ||
+      normalizedModels.some((model: string) =>
+        model.includes(selectedModel.toLowerCase().trim()),
+      );
 
     // 🟣 TIPO
     const matchType =
@@ -256,199 +265,489 @@ export default function ProductsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 mt-8 flex flex-col lg:flex-row gap-8">
+      <main className="max-w-[1500px] mx-auto px-5 lg:px-8 mt-8 flex flex-col lg:flex-row gap-10">
         {/* FILTROS */}
-        <aside className="w-full lg:w-64">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-6">
-            <h2 className="text-lg font-bold text-[#00173D]">Filtros</h2>
-            {/* MODELO */}
+        <aside className="w-full lg:w-[320px] xl:w-[340px]">
+          <div className="bg-white/95 backdrop-blur-sm p-6 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-200/70 space-y-6 sticky top-50">
+            <h2 className="text-xl font-bold text-[#00173D]">Filtros</h2>
+
+            {/* BOTON */}
             <button
               onClick={clearFilters}
-              className="w-full bg-blue-800 text-white-800 py-2 rounded-lg font-medium hover:bg-blue-300 transition"
+              className="w-full bg-[#00173D] text-white py-3 rounded-xl font-semibold hover:bg-[#00245e] transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Limpiar filtros
             </button>
+
+            {/* MARCAS */}
             <div>
               <h3 className="font-semibold mb-3 text-black">Nuestras Marcas</h3>
-              {["Todos", "Volkswagen", "Chevrolet", "Renault"].map((p) => (
-                <label key={p} className="flex gap-2 text-sm text-black">
-                  <input
-                    type="radio"
-                    checked={selectedBrand === p}
-                    onChange={() => setSelectedBrand(p)}
-                  />
-                  {p}
-                </label>
-              ))}
+
+              <div className="relative">
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="
+        w-full
+        appearance-none
+        bg-white
+        border border-gray-300
+        rounded-2xl
+        px-4
+        py-3
+        pr-12
+        text-sm
+        font-medium
+        text-[#00173D]
+        shadow-sm
+        transition-all
+        duration-300
+        hover:border-[#00173D]
+        hover:shadow-md
+        focus:outline-none
+        focus:ring-2
+        focus:ring-[#00173D]/20
+        focus:border-[#00173D]
+        cursor-pointer
+      "
+                >
+                  {["Todos", "Volkswagen", "Chevrolet", "Renault"].map(
+                    (brand) => (
+                      <option
+                        key={brand}
+                        value={brand}
+                        className="text-black bg-white"
+                      >
+                        {brand}
+                      </option>
+                    ),
+                  )}
+                </select>
+
+                {/* ICONO */}
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
+
             {/* MODELO */}
             <div>
               <h3 className="font-semibold mb-3 text-black">
-                Modelo Volkswagen
+                Modelo del Vehículo
               </h3>
-              {[
-                "Todos",
-                "Golf",
-                "Amarok",
-                "Polo",
-                "Vento",
-                "Passat",
-                "Tiguan",
-              ].map((m) => (
-                <label key={m} className="flex gap-2 text-sm text-black">
-                  <input
-                    type="radio"
-                    checked={selectedModel === m}
-                    onChange={() => setSelectedModel(m)}
-                  />
-                  {m}
-                </label>
-              ))}
+
+              <div className="relative">
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="
+        w-full
+        appearance-none
+        bg-white
+        border border-gray-300
+        rounded-2xl
+        px-4
+        py-3
+        pr-12
+        text-sm
+        font-medium
+        text-[#00173D]
+        shadow-sm
+        transition-all
+        duration-300
+        hover:border-[#00173D]
+        hover:shadow-md
+        focus:outline-none
+        focus:ring-2
+        focus:ring-[#00173D]/20
+        focus:border-[#00173D]
+        cursor-pointer
+      "
+                >
+                  {[
+                    "Todos",
+
+                    // Volkswagen
+                    "Fox",
+                    "Suran",
+                    "Golf",
+                    "Gol",
+                    "Voyage",
+                    "Amarok",
+                    "Passat",
+                    "Polo",
+                    "Vento",
+                    "Saveiro",
+                    "Tiguan",
+                    "Bora",
+
+                    // Renault
+                    "Clio",
+                    "Kangoo",
+                    "Scenic",
+                    "Logan",
+                    "Megane",
+                    "Sandero",
+                    "Duster",
+                    "Fluence",
+                    "Captur",
+                    "Symbol",
+                  ].map((model) => (
+                    <option
+                      key={model}
+                      value={model}
+                      className="text-black bg-white"
+                    >
+                      {model}
+                    </option>
+                  ))}
+                </select>
+
+                {/* ICONO */}
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* TIPO */}
             <div>
               <h3 className="font-semibold mb-3 text-black">
-                Tipo de repuesto
+                Tipo de Repuesto
               </h3>
-              {[
-                "Todas",
-                "Motor",
-                "Frenos",
-                "Suspensión",
-                "Electricidad",
-                "Filtros",
-                "Accesorios",
-              ].map((t) => (
-                <label key={t} className="flex gap-2 text-sm text-black">
-                  <input
-                    type="radio"
-                    checked={selectedType === t}
-                    onChange={() => setSelectedType(t)}
-                  />
-                  {t}
-                </label>
-              ))}
+
+              <div className="relative">
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="
+        w-full
+        appearance-none
+        bg-white
+        border border-gray-300
+        rounded-2xl
+        px-4
+        py-3
+        pr-12
+        text-sm
+        font-medium
+        text-[#00173D]
+        shadow-sm
+        transition-all
+        duration-300
+        hover:border-[#00173D]
+        hover:shadow-md
+        focus:outline-none
+        focus:ring-2
+        focus:ring-[#00173D]/20
+        focus:border-[#00173D]
+        cursor-pointer
+      "
+                >
+                  {[
+                    "Todas",
+                    "Motor",
+                    "Frenos",
+                    "Suspensión",
+                    "Electricidad",
+                    "Filtros",
+                    "Accesorios",
+                  ].map((type) => (
+                    <option
+                      key={type}
+                      value={type}
+                      className="text-black bg-white"
+                    >
+                      {type}
+                    </option>
+                  ))}
+                </select>
+
+                {/* ICONO */}
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* PRECIO */}
             <div>
-              <h3 className="font-semibold mb-3 text-black">Precio</h3>
-              {[
-                "Todos",
-                "Hasta 30000",
-                "30000-60000",
-                "60000-100000",
-                "100000+",
-              ].map((p) => (
-                <label key={p} className="flex gap-2 text-sm text-black">
-                  <input
-                    type="radio"
-                    checked={selectedPrice === p}
-                    onChange={() => setSelectedPrice(p)}
-                  />
-                  {p}
-                </label>
-              ))}
+              <h3 className="font-semibold mb-3 text-black">Rango de Precio</h3>
+
+              <div className="relative">
+                <select
+                  value={selectedPrice}
+                  onChange={(e) => setSelectedPrice(e.target.value)}
+                  className="
+        w-full
+        appearance-none
+        bg-white
+        border border-gray-300
+        rounded-2xl
+        px-4
+        py-3
+        pr-12
+        text-sm
+        font-medium
+        text-[#00173D]
+        shadow-sm
+        transition-all
+        duration-300
+        hover:border-[#00173D]
+        hover:shadow-md
+        focus:outline-none
+        focus:ring-2
+        focus:ring-[#00173D]/20
+        focus:border-[#00173D]
+        cursor-pointer
+      "
+                >
+                  {[
+                    "Todos",
+                    "Hasta 30000",
+                    "30000-60000",
+                    "60000-100000",
+                    "100000+",
+                  ].map((price) => (
+                    <option
+                      key={price}
+                      value={price}
+                      className="text-black bg-white"
+                    >
+                      {price}
+                    </option>
+                  ))}
+                </select>
+
+                {/* ICONO */}
+                <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-500">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* PRODUCTOS */}
         <section className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={`${product.source}-${product.id}`}
-                onClick={() =>
-                  router.push(
-                    product.isCatalog
-                      ? `/catalogo/${product.id}`
-                      : `/product/${product.id}`,
-                  )
-                }
-                className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition flex flex-col cursor-pointer"
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white rounded-3xl border shadow-sm min-h-[500px] flex flex-col items-center justify-center text-center p-10">
+              {/* LOGO */}
+              <img
+                src="/DOVVV.png"
+                alt="Logo"
+                className="w-32 md:w-40 object-contain opacity-90 mb-6"
+              />
+
+              <h2 className="text-2xl font-bold text-[#00173D]">
+                No se encontraron productos
+              </h2>
+
+              <p className="text-gray-500 mt-3 max-w-md">
+                No hay resultados con los filtros seleccionados. Probá cambiando
+                la marca, modelo o rango de precio.
+              </p>
+
+              <button
+                onClick={clearFilters}
+                className="
+          mt-8
+          bg-[#00173D]
+          hover:bg-[#00245e]
+          text-white
+          px-8
+          py-3
+          rounded-2xl
+          font-semibold
+          transition-all
+          duration-300
+          shadow-lg
+          hover:shadow-xl
+        "
               >
-                <div className="relative h-48 bg-gray-200">
-                  <img
-                    src={product.image1 || product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                Limpiar filtros
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+              {filteredProducts.map((product) => (
+                <div
+                  key={`${product.source}-${product.id}`}
+                  onClick={() =>
+                    router.push(
+                      product.isCatalog
+                        ? `/catalogo/${product.id}`
+                        : `/product/${product.id}`,
+                    )
+                  }
+                  className="
+            bg-white
+            rounded-3xl
+            shadow-sm
+            border
+            overflow-hidden
+            hover:shadow-2xl
+            hover:-translate-y-1
+            transition-all
+            duration-300
+            flex
+            flex-col
+            cursor-pointer
+          "
+                >
+                  <div className="relative h-56 bg-gray-100 overflow-hidden">
+                    <img
+                      src={product.image1 || product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                    />
+                  </div>
 
-                <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-semibold text-[#00173D]">
-                    {product.name}
-                  </h3>
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="font-bold text-[#00173D] text-lg leading-snug">
+                      {product.name}
+                    </h3>
 
-                  <p className="text-sm mt-2 text-black">
-                    OEM: {product.oem_number}
-                  </p>
-
-                  {product.oem_equivalents && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      OEM Equivalentes:{" "}
-                      {Array.isArray(product.oem_equivalents)
-                        ? product.oem_equivalents.join(", ")
-                        : product.oem_equivalents}
+                    <p className="text-sm mt-3 text-gray-700">
+                      OEM: {product.oem_number}
                     </p>
-                  )}
 
-                  {product.isCatalog ? (
-                    <>
-                      <p className="text-lg font-semibold mt-auto mb-4 text-green-700">
-                        Consultar precio
+                    {product.oem_equivalents && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        OEM Equivalentes:{" "}
+                        {Array.isArray(product.oem_equivalents)
+                          ? product.oem_equivalents.join(", ")
+                          : product.oem_equivalents}
                       </p>
+                    )}
 
-                      <button
-                        onClick={() => {
-                          const phone = "5491127561595"; // 🔥 tu número (sin +, con 54 y 9)
+                    {product.isCatalog ? (
+                      <>
+                        <p className="text-xl font-bold mt-auto mb-5 text-green-700 pt-6">
+                          Consultar precio
+                        </p>
 
-                          const message = `Hola! Estoy interesado en el producto:
+                        <button
+                          onClick={() => {
+                            const phone = "5491127561595";
+
+                            const message = `Hola! Estoy interesado en el producto:
     
 🧩 ${product.name}
 🔧 OEM: ${product.oem_number}
 
 ¿Podrían darme más información?`;
 
-                          const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+                            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-                          window.open(url, "_blank");
-                        }}
-                        className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition  cursor-pointer"
-                      >
-                        Consultar por WhatsApp
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-xl font-bold mt-auto mb-4 text-blue-900">
-                        ${Number(product.price).toLocaleString("es-AR")}
-                      </p>
+                            window.open(url, "_blank");
+                          }}
+                          className="
+                    w-full
+                    bg-green-600
+                    hover:bg-green-700
+                    text-white
+                    py-3
+                    rounded-2xl
+                    font-semibold
+                    transition-all
+                    duration-300
+                    shadow-md
+                  "
+                        >
+                          Consultar por WhatsApp
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold mt-auto mb-5 text-[#00173D] pt-6">
+                          ${Number(product.price).toLocaleString("es-AR")}
+                        </p>
 
-                      <button
-                        onClick={(e) => addToCart(e, product)}
-                        disabled={loading2}
-                        className="w-full bg-[#00173D] hover:bg-blue-900 text-white py-2 rounded-lg  cursor-pointer"
-                      >
-                        {loading2 ? (
-                          <div className="flex items-center gap-2 justify-center">
-                            <Loader2 size={18} className="animate-spin" />
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 justify-center">
-                            <ShoppingCart size={18} />
-                            <span>Agregar al carrito</span>
-                          </div>
-                        )}
-                      </button>
-                    </>
-                  )}
+                        <button
+                          onClick={(e) => addToCart(e, product)}
+                          disabled={loading2}
+                          className="
+                    w-full
+                    bg-[#00173D]
+                    hover:bg-blue-900
+                    text-white
+                    py-3
+                    rounded-2xl
+                    font-semibold
+                    transition-all
+                    duration-300
+                    shadow-md
+                    cursor-pointer
+                  "
+                        >
+                          {loading2 ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <Loader2 size={18} className="animate-spin" />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 justify-center">
+                              <ShoppingCart size={18} />
+                              <span>Agregar al carrito</span>
+                            </div>
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </div>

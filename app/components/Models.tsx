@@ -29,7 +29,7 @@ export default function BrandsSection() {
   };
 
   return (
-    <section className="bg-[#f8fafd] py-12">
+    <section className="bg-[#eef3f9] py-12">
       <div className="max-w-6xl mx-auto px-4">
         {/* HEADER */}
         <div className="mb-8 ">

@@ -13,14 +13,16 @@ export default function ContactPage() {
   };
 
   return (
-    <section className="bg-gradient-to-r from-[#0b2a5b] to-[#0a2a55] py-16 px-4 mt-5">
+    <section className="bg-[#eef3f9] py-16 px-4 mt-5">
       <div className="max-w-6xl mx-auto">
         {/* HEADER */}
         <div className="text-center mb-12 mt-10 sm:mt-0 md:mt-0">
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
+          {/* TITLE */}
+          <h1 className="text-4xl md:text-[42px] lg:text-6xl font-black leading-[1.02] tracking-tight text-blue-900">
             Contactanos
-          </h2>
-          <p className="text-white mt-3">
+          </h1>
+
+          <p className="text-blue-900 text-lg mt-3">
             Estamos para ayudarte con cualquier consulta sobre repuestos
           </p>
         </div>
