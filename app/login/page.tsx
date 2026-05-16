@@ -158,7 +158,7 @@ export default function Login() {
         <div className="w-full max-w-md space-y-12">
           <div className="text-center md:text-left">
             <h3 className="text-4xl font-black text-gray-900 mb-2 italic uppercase">
-              SIGN IN
+              Iniciar sesión
             </h3>{" "}
             {/* si le dejo ingresar queda re para el culo  */}
             <p className="text-gray-400 font-medium">
