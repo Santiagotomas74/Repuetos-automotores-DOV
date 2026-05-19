@@ -23,20 +23,20 @@ export default function Footer() {
 
             <ul className="space-y-3 text-sm text-gray-300">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="/terminos-y-condiciones"
+                  className="hover:text-white transition-colors"
+                >
                   Términos y Condiciones
                 </a>
               </li>
 
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="/politica-de-privacidad"
+                  className="hover:text-white transition-colors"
+                >
                   Política de Privacidad
-                </a>
-              </li>
-
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Política de Devoluciones
                 </a>
               </li>
             </ul>
