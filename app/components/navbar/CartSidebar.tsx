@@ -46,13 +46,7 @@ export default function CartSidebar({
   const [orderId, setOrderId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const shippingCost = 3500;
-  let discountedTotal =
-    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.85; // 15% de descuento por transferencia
-  discountedTotal =
-    deliveryType === "shipping"
-      ? discountedTotal + shippingCost
-      : discountedTotal; // agregar costo de envío si corresponde
+  const shippingCost = 15500;
 
   const [address, setAddress] = useState({
     full_name: "",
@@ -938,6 +932,11 @@ export default function CartSidebar({
                               ${total.toLocaleString()}
                             </span>
                           </div>
+                        </div>
+                        <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-xs text-yellow-900 mt-2">
+                          Reservamos tu pedido por unas horas hasta que envies
+                          el comprobante de la transferencia. Pasado ese tiempo,
+                          la orden se cancelará automáticamente.
                         </div>
                       </button>
                     </div>
