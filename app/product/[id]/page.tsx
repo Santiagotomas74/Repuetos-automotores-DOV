@@ -318,7 +318,7 @@ export default function ProductDetail() {
             {/* FEATURES */}
             <div className="grid grid-cols-3 gap-4 mt-6 text-center text-sm">
               <div className="bg-gray-100 p-3 rounded-lg text-green-600 font-medium">
-                🚚 Envío gratis
+                🚚 Envios gratis en Zona San Miguel a partir de $100.000
               </div>
               <div className="bg-gray-100 p-3 rounded-lg text-green-600 font-medium">
                 🛡️ Garantía
