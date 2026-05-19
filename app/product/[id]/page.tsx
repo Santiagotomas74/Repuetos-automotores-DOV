@@ -239,11 +239,8 @@ export default function ProductDetail() {
               ${Number(product.price).toLocaleString("es-AR")}
             </p>
 
-            {/* DESCRIPCIÓN */}
-            <p className="text-gray-600 mt-4">{product.description}</p>
-
             {/* COMPATIBILIDAD */}
-            <div className="bg-gray-100 rounded-xl p-4 mt-6">
+            <div className="bg-gray-100 rounded-xl p-4 mt-3">
               <h3 className="font-semibold mb-2 text-gray-700">
                 Compatibilidad:
               </h3>
@@ -340,27 +337,35 @@ export default function ProductDetail() {
         {/* 🔽 DETALLES */}
         <div className="mt-12 bg-white border rounded-xl p-6">
           <h2 className="text-xl font-bold mb-4 text-gray-700">
+            Detalles del Producto
+          </h2>
+          {/* DESCRIPCIÓN */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-gray-600 mt-3 mb-3">{product.description}</p>
+          </div>
+
+          <h2 className="text-xl font-bold mb-4 text-gray-700">
             Especificaciones Técnicas
           </h2>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500">Marca</p>
+          <div className="grid grid-cols-2 gap-4 text-sm ">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-500">Marca:</p>
               <p className="font-medium text-gray-700">{product.brand}</p>
             </div>
 
-            <div>
-              <p className="text-gray-500">Código OEM</p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-500">Código OEM y equivalentes:</p>
               <p className="font-medium text-gray-700">{product.oem_number}</p>
             </div>
 
-            <div>
-              <p className="text-gray-500">Tipo</p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-500">Tipo de Pieza:</p>
               <p className="font-medium text-gray-700">{product.part_type}</p>
             </div>
 
-            <div>
-              <p className="text-gray-500">Stock</p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-500">Stock:</p>
               <p className="font-medium text-gray-700">{product.stock}</p>
             </div>
           </div>

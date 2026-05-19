@@ -53,7 +53,7 @@ export default function Footer() {
 
               <li>Teléfono: (+54) 9 11 2756-1595 o (+54) 9 11 2742-4592</li>
 
-              <li>Email: info@vwparts.com</li>
+              <li>Email: tallerdov7@gmail.com</li>
             </ul>
           </div>
 

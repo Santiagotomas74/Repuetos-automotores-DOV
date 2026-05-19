@@ -59,7 +59,7 @@ export default function ContactPage() {
               className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition cursor-pointer"
             >
               <FaWhatsapp size={20} />
-              Escribir por WhatsApp
+              Escríbenos por WhatsApp
             </button>
             <img
               src="/frente.png"
