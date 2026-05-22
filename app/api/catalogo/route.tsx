@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     image2,
     image3,
     image4,
-    part_type,        // 🔹 tipo de repuesto
-    compatible_models,       // 🔹 modelo compatible
-    brand        // 🔹 marca
+    part_type, // 🔹 tipo de repuesto
+    compatible_models, // 🔹 modelo compatible
+    brand, // 🔹 marca
   } = await req.json();
 
   try {
@@ -42,15 +42,14 @@ export async function POST(req: NextRequest) {
         brand
       )
       VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-        $11, 
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11 
       )
       RETURNING *`,
       [
         oem_number,
         oem_equivalents,
         name,
-      
+
         description,
         image1,
         image2,
@@ -58,18 +57,17 @@ export async function POST(req: NextRequest) {
         image4,
         part_type,
         compatible_models,
-        brand
-      ]
+        brand,
+      ],
     );
 
     return NextResponse.json(rows[0]);
-
   } catch (error) {
     console.error("Error creando producto:", error);
 
     return NextResponse.json(
       { error: "Error al crear producto" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
