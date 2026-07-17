@@ -16,7 +16,7 @@ const models = [
   {
     name: "Polo",
     image:
-      "https://i0.wp.com/automundo.com.ar/wp-content/uploads/2023/08/VW-Polo-3.jpg?fit=1200%2C800&ssl=1",
+      "https://imgs.search.brave.com/G7AhD91EL4k6YTNWQk7Yjel9HW9c179SSZz_JbJytIc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy80/LzRhLzIwMThfVm9s/a3N3YWdlbl9Qb2xv/X1ItTGluZV9UU2lf/MS4wX0Zyb250Lmpw/Zw",
   },
   {
     name: "Vento",
